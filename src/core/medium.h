@@ -77,9 +77,18 @@ class Medium {
     // Medium Interface
     virtual ~Medium() {}
     virtual Spectrum Tr(const Ray &ray, Sampler &sampler) const = 0;
-    virtual Spectrum Sample(const Ray &ray, Sampler &sampler,
+    virtual Spectrum Sample(const Ray &ray,
+                            Sampler &sampler,
                             MemoryArena &arena,
                             MediumInteraction *mi) const = 0;
+    virtual Spectrum Sample(const Ray &ray,
+                            Sampler &sampler,
+                            Sampler &trans_sampler,
+                            MemoryArena &arena,
+                            MediumInteraction *mi) const
+    {
+        return Spectrum(1.f);
+    }
 };
 
 // HenyeyGreenstein Declarations

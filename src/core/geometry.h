@@ -242,9 +242,13 @@ class Vector3 {
     }
     template <typename U>
     Vector3<T> operator/(U f) const {
-        CHECK_NE(f, 0);
+        // CHECK_NE(f, 0); // this is worrisome - some of the geometry is too degenerate
         Float inv = (Float)1 / f;
         return Vector3<T>(x * inv, y * inv, z * inv);
+    }
+    T absSum() const
+    {
+        return std::abs(x) + std::abs(y) + std::abs(z);
     }
 
     template <typename U>
@@ -522,6 +526,10 @@ class Point3 {
         if (i == 0) return x;
         if (i == 1) return y;
         return z;
+    }
+    T absSum() const
+    {
+        return std::abs(x) + std::abs(y) + std::abs(z);
     }
     bool operator==(const Point3<T> &p) const {
         return x == p.x && y == p.y && z == p.z;

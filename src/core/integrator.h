@@ -57,19 +57,57 @@ class Integrator {
     virtual void Render(const Scene &scene) = 0;
 };
 
-Spectrum UniformSampleAllLights(const Interaction &it, const Scene &scene,
-                                MemoryArena &arena, Sampler &sampler,
+Spectrum UniformSampleAllLights(const Interaction &it,
+                                const Scene &scene,
+                                MemoryArena &arena,
+                                Sampler &sampler,
+                                Sampler &trans_sampler,
                                 const std::vector<int> &nLightSamples,
                                 bool handleMedia = false);
-Spectrum UniformSampleOneLight(const Interaction &it, const Scene &scene,
-                               MemoryArena &arena, Sampler &sampler,
+
+Spectrum UniformSampleAllLights(const Interaction &it,
+                                const Scene &scene,
+                                MemoryArena &arena,
+                                Sampler &sampler,
+                                const std::vector<int> &nLightSamples,
+                                bool handleMedia = false);
+
+Spectrum UniformSampleOneLight(const Interaction &it,
+                               const Scene &scene,
+                               MemoryArena &arena,
+                               Sampler &sampler,
+                               Sampler &trans_sampler,
                                bool handleMedia = false,
                                const Distribution1D *lightDistrib = nullptr);
-Spectrum EstimateDirect(const Interaction &it, const Point2f &uShading,
-                        const Light &light, const Point2f &uLight,
-                        const Scene &scene, Sampler &sampler,
-                        MemoryArena &arena, bool handleMedia = false,
+
+Spectrum UniformSampleOneLight(const Interaction &it,
+                               const Scene &scene,
+                               MemoryArena &arena,
+                               Sampler &sampler,
+                               bool handleMedia = false,
+                               const Distribution1D *lightDistrib = nullptr);
+
+Spectrum EstimateDirect(const Interaction &it,
+                        const Point2f &uShading,
+                        const Light &light,
+                        const Point2f &uLight,
+                        const Scene &scene,
+                        Sampler &sampler,
+                        Sampler& trans_sampler,
+                        MemoryArena &arena,
+                        bool handleMedia = false,
                         bool specular = false);
+
+Spectrum EstimateDirect(const Interaction &it,
+                        const Point2f &uShading,
+                        const Light &light,
+                        const Point2f &uLight,
+                        const Scene &scene,
+                        Sampler &sampler,
+                        MemoryArena &arena,
+                        bool handleMedia = false,
+                        bool specular = false);
+
 std::unique_ptr<Distribution1D> ComputeLightPowerDistribution(
     const Scene &scene);
 
@@ -79,13 +117,51 @@ class SamplerIntegrator : public Integrator {
     // SamplerIntegrator Public Methods
     SamplerIntegrator(std::shared_ptr<const Camera> camera,
                       std::shared_ptr<Sampler> sampler,
+                      const Bounds2i &pixelBounds,
+                      long maxSeconds,
+                      long maxExtCalls,
+                      std::string trans_sampler,
+                      std::string ff_sampler,
+                      bool ff_correlated,
+                      bool multithreaded)
+        : camera(camera),
+          sampler(sampler),
+          pixelBounds(pixelBounds),
+          maxSeconds(maxSeconds),
+          maxExtCalls(maxExtCalls),
+          trans_sampler(trans_sampler),
+          ff_sampler(ff_sampler),
+          ff_correlated(ff_correlated),
+          multithreaded(multithreaded),
+          measured_render(true) {}
+
+    SamplerIntegrator(std::shared_ptr<const Camera> camera,
+                      std::shared_ptr<Sampler> sampler,
                       const Bounds2i &pixelBounds)
         : camera(camera), sampler(sampler), pixelBounds(pixelBounds) {}
     virtual void Preprocess(const Scene &scene, Sampler &sampler) {}
     void Render(const Scene &scene);
-    virtual Spectrum Li(const RayDifferential &ray, const Scene &scene,
-                        Sampler &sampler, MemoryArena &arena,
+    virtual Spectrum Li(const RayDifferential &ray,
+                        const Scene &scene,
+                        Sampler &sampler,
+                        MemoryArena &arena,
                         int depth = 0) const = 0;
+
+    virtual Spectrum Li(const RayDifferential &ray,
+                        const Scene &scene,
+                        Sampler &sampler,
+                        Sampler &trans_sampler,
+                        Sampler& ff_sampler,
+                        MemoryArena &arena,
+                        int depth = 0) const
+    {
+        return Li(ray,
+                  scene,
+                  sampler,
+                  arena,
+                  depth);
+    }
+
     Spectrum SpecularReflect(const RayDifferential &ray,
                              const SurfaceInteraction &isect,
                              const Scene &scene, Sampler &sampler,
@@ -95,6 +171,26 @@ class SamplerIntegrator : public Integrator {
                               const Scene &scene, Sampler &sampler,
                               MemoryArena &arena, int depth) const;
 
+    Spectrum SpecularReflect(const RayDifferential &ray,
+                             const SurfaceInteraction &isect,
+                             const Scene &scene,
+                             Sampler &sampler,
+                             Sampler& trans_sampler,
+                             Sampler& ff_sampler,
+                             MemoryArena &arena,
+                             int depth) const;
+    Spectrum SpecularTransmit(const RayDifferential &ray,
+                              const SurfaceInteraction &isect,
+                              const Scene &scene,
+                              Sampler &sampler,
+                              Sampler& trans_sampler,
+                              Sampler& ff_sampler,
+                              MemoryArena &arena,
+                              int depth) const;
+
+    virtual long getMaxSeconds() const { return maxSeconds; }
+    virtual long getMaxExtCalls() const { return maxExtCalls; }
+
   protected:
     // SamplerIntegrator Protected Data
     std::shared_ptr<const Camera> camera;
@@ -103,6 +199,13 @@ class SamplerIntegrator : public Integrator {
     // SamplerIntegrator Private Data
     std::shared_ptr<Sampler> sampler;
     const Bounds2i pixelBounds;
+    long maxSeconds;
+    long maxExtCalls;
+    std::string trans_sampler;
+    std::string ff_sampler;
+    bool ff_correlated;
+    bool multithreaded;
+    bool measured_render = false;
 };
 
 }  // namespace pbrt

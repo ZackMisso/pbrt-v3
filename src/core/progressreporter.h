@@ -50,8 +50,13 @@ namespace pbrt {
 class ProgressReporter {
   public:
     // ProgressReporter Public Methods
-    ProgressReporter(int64_t totalWork, const std::string &title);
+    ProgressReporter(int64_t totalWork, const std::string &title, long maxTime = 200);
     ~ProgressReporter();
+    void UpdateExact(int64_t num)
+    {
+        if (PbrtOptions.quiet) return;
+        workDone = num;
+    }
     void Update(int64_t num = 1) {
         if (num == 0 || PbrtOptions.quiet) return;
         workDone += num;
@@ -67,11 +72,15 @@ class ProgressReporter {
     }
     void Done();
 
+    bool continueRun(long maxDenseCalls) const;
+    long getCurrentTime() const;
+
   private:
     // ProgressReporter Private Methods
     void PrintBar();
 
     // ProgressReporter Private Data
+    const long maxTime;
     const int64_t totalWork;
     const std::string title;
     const std::chrono::system_clock::time_point startTime;

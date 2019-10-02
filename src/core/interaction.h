@@ -104,13 +104,28 @@ class MediumInteraction : public Interaction {
   public:
     // MediumInteraction Public Methods
     MediumInteraction() : phase(nullptr) {}
-    MediumInteraction(const Point3f &p, const Vector3f &wo, Float time,
-                      const Medium *medium, const PhaseFunction *phase)
+    MediumInteraction(const Point3f &p,
+                      const Vector3f &wo,
+                      Float time,
+                      const Medium *medium,
+                      const PhaseFunction *phase)
         : Interaction(p, wo, time, medium), phase(phase) {}
+    MediumInteraction(const Point3f &p,
+                      const Vector3f &wo,
+                      Float time,
+                      const Medium *medium,
+                      const PhaseFunction *phase,
+                      const Ray ray,
+                      const Float tMax,
+                      const Float tMin)
+        : Interaction(p, wo, time, medium), phase(phase), tMax(tMax), tMin(tMin), ray(ray) {}
     bool IsValid() const { return phase != nullptr; }
 
     // MediumInteraction Public Data
     const PhaseFunction *phase;
+    Ray ray;
+    Float tMax;
+    Float tMin;
 };
 
 // SurfaceInteraction Declarations

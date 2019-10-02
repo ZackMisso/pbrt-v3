@@ -59,6 +59,7 @@
 #include "integrators/path.h"
 #include "integrators/sppm.h"
 #include "integrators/volpath.h"
+#include "integrators/volpath_recursive.h"
 #include "integrators/whitted.h"
 #include "lights/diffuse.h"
 #include "lights/distant.h"
@@ -112,8 +113,21 @@
 #include "textures/uv.h"
 #include "textures/windy.h"
 #include "textures/wrinkled.h"
+
 #include "media/grid.h"
 #include "media/homogeneous.h"
+#include "media/heterogeneous.h"
+#include "media/minorant/minorant.h"
+#include "media/majorant/majorant.h"
+#include "media/density/density_func.h"
+#include "media/density/grid_density.h"
+#include "media/density/texture_density.h"
+#if OPENVDB
+    #include "media/density/vdb_density.h"
+#endif
+
+#include "procedural_media/voronoi_spiral_media.h"
+#include "procedural_media/chess_media.h"
 
 #include <map>
 #include <stdio.h>
@@ -597,7 +611,8 @@ std::shared_ptr<Material> MakeMaterial(const std::string &name,
 
     if ((name == "subsurface" || name == "kdsubsurface") &&
         (renderOptions->IntegratorName != "path" &&
-         (renderOptions->IntegratorName != "volpath")))
+        (renderOptions->IntegratorName != "volpath_recursive" &&
+        (renderOptions->IntegratorName != "volpath"))))
         Warning(
             "Subsurface scattering material \"%s\" used, but \"%s\" "
             "integrator doesn't support subsurface scattering. "
@@ -676,6 +691,10 @@ std::shared_ptr<Texture<Spectrum>> MakeSpectrumTexture(
         tex = CreateWindySpectrumTexture(tex2world, tp);
     else if (name == "ptex")
         tex = CreatePtexSpectrumTexture(tex2world, tp);
+    else if (name == "voronoi_spiral")
+        tex = CreateVoronoiSpiralProceduralMedia(tp);
+    else if (name == "chess_texture")
+        tex = CreateChessTextureMedia(tp);
     else
         Warning("Spectrum texture \"%s\" unknown.", name.c_str());
     tp.ReportUnused();
@@ -683,49 +702,255 @@ std::shared_ptr<Texture<Spectrum>> MakeSpectrumTexture(
 }
 
 std::shared_ptr<Medium> MakeMedium(const std::string &name,
-                                   const ParamSet &paramSet,
-                                   const Transform &medium2world) {
+                                   const TextureParams &tp,
+                                   const Transform &medium2world)
+{
+    ParamSet paramSet = tp.GetMaterialParams();
     Float sig_a_rgb[3] = {.0011f, .0024f, .014f},
-          sig_s_rgb[3] = {2.55f, 3.21f, 3.77f};
+         sig_s_rgb[3] = {2.55f, 3.21f, 3.77f};
     Spectrum sig_a = Spectrum::FromRGB(sig_a_rgb),
-             sig_s = Spectrum::FromRGB(sig_s_rgb);
+            sig_s = Spectrum::FromRGB(sig_s_rgb);
     std::string preset = paramSet.FindOneString("preset", "");
     bool found = GetMediumScatteringProperties(preset, &sig_a, &sig_s);
     if (preset != "" && !found)
-        Warning("Material preset \"%s\" not found.  Using defaults.",
-                preset.c_str());
+       Warning("Material preset \"%s\" not found.  Using defaults.",
+               preset.c_str());
     Float scale = paramSet.FindOneFloat("scale", 1.f);
     Float g = paramSet.FindOneFloat("g", 0.0f);
     sig_a = paramSet.FindOneSpectrum("sigma_a", sig_a) * scale;
     sig_s = paramSet.FindOneSpectrum("sigma_s", sig_s) * scale;
+    int trType = paramSet.FindOneInt("trType", 1);
     Medium *m = NULL;
     if (name == "homogeneous") {
-        m = new HomogeneousMedium(sig_a, sig_s, g);
+       m = new HomogeneousMedium(sig_a, sig_s, g);
     } else if (name == "heterogeneous") {
-        int nitems;
-        const Float *data = paramSet.FindFloat("density", &nitems);
-        if (!data) {
-            Error("No \"density\" values provided for heterogeneous medium?");
-            return NULL;
-        }
-        int nx = paramSet.FindOneInt("nx", 1);
-        int ny = paramSet.FindOneInt("ny", 1);
-        int nz = paramSet.FindOneInt("nz", 1);
-        Point3f p0 = paramSet.FindOnePoint3f("p0", Point3f(0.f, 0.f, 0.f));
-        Point3f p1 = paramSet.FindOnePoint3f("p1", Point3f(1.f, 1.f, 1.f));
-        if (nitems != nx * ny * nz) {
-            Error(
-                "GridDensityMedium has %d density values; expected nx*ny*nz = "
-                "%d",
-                nitems, nx * ny * nz);
-            return NULL;
-        }
-        Transform data2Medium = Translate(Vector3f(p0)) *
-                                Scale(p1.x - p0.x, p1.y - p0.y, p1.z - p0.z);
-        m = new GridDensityMedium(sig_a, sig_s, g, nx, ny, nz,
-                                  medium2world * data2Medium, data);
-    } else
-        Warning("Medium \"%s\" unknown.", name.c_str());
+       // new implementation
+       std::string densityFuncName = paramSet.FindOneString("densityFunc", "texture");
+       std::string transEstName = paramSet.FindOneString("transEstFunc", "");
+       std::string majFuncName = paramSet.FindOneString("majFunc", "");
+       std::string minFuncName = paramSet.FindOneString("minFunc", "");
+       std::string sampFuncName = paramSet.FindOneString("sampFunc", "");
+
+       DensityFunction* density = nullptr;
+       T_Estimator* t_est = nullptr;
+       MajorantFunction* maj = nullptr;
+       MinorantFunction* min = nullptr;
+       FF_Sampler* ff_samp = nullptr;
+
+       Point3f minBounds = paramSet.FindOnePoint3f("minBounds", Point3f(-0.5, -0.5, -0.5));
+       Point3f maxBounds = paramSet.FindOnePoint3f("maxBounds", Point3f(0.5, 0.5, 0.5));
+       Bounds3f mediumBounds = Bounds3f(minBounds, maxBounds);
+
+       Float majScale = paramSet.FindOneFloat("majScale", 1.0);
+
+       Transform medToWorld;
+
+       // create the density function //
+       if (densityFuncName == "grid")
+       {
+           GridDensityFunction* gridFunc = new GridDensityFunction();
+
+           int nitems;
+           const Float *data = paramSet.FindFloat("density", &nitems);
+           if (!data) {
+               Error("No \"density\" values provided for heterogeneous medium?");
+               return NULL;
+           }
+
+           int width = paramSet.FindOneInt("nx", 1);
+           int height = paramSet.FindOneInt("ny", 1);
+           int depth = paramSet.FindOneInt("nz", 1);
+
+           Point3f p0 = paramSet.FindOnePoint3f("p0", Point3f(0.f, 0.f, 0.f));
+           Point3f p1 = paramSet.FindOnePoint3f("p1", Point3f(1.f, 1.f, 1.f));
+
+           if (nitems != width * height * depth) {
+               Error(
+                   "GridDensityMedium has %d density values; expected nx*ny*nz = "
+                   "%d",
+                   nitems, width * height * depth);
+               return NULL;
+           }
+
+           Transform data2Medium = Translate(Vector3f(p0)) *
+                                   Scale(p1.x - p0.x, p1.y - p0.y, p1.z - p0.z);
+
+           medToWorld = medium2world * data2Medium;
+
+           gridFunc->width = width;
+           gridFunc->height = height;
+           gridFunc->depth = depth;
+
+           gridFunc->density = new Float[width * height * depth];
+
+           uint32_t densityBytes = width * height * depth * sizeof(Float);
+
+           memcpy(gridFunc->density, data, densityBytes);
+
+           density = gridFunc;
+       }
+       else if (densityFuncName == "texture")
+       {
+           std::shared_ptr<Texture<Spectrum>> texture = tp.GetSpectrumTextureOrNull("procedural");
+           if (!texture) std::cout << "da fuk" << std::endl;
+           Spectrum scale = paramSet.FindOneSpectrum("scale", Spectrum(1.0));
+           density = new TextureDensityFunction(scale, texture);
+       }
+       #if OPENVDB
+       else if (densityFuncName == "vdb")
+       {
+           std::string vdb_filename = paramSet.FindOneString("vdb_filename", "notfound.vdb");
+
+           Point3f min_box = paramSet.FindOnePoint3f("minBounds", Point3f(0.0, 0.0, 0.0));
+           Point3f max_box = paramSet.FindOnePoint3f("maxBounds", Point3f(1.0, 1.0, 1.0));
+
+           bool worldSpace = paramSet.FindOneBool("worldSpace", true);
+           bool clampDensities = paramSet.FindOneBool("clampDensities", false);
+           bool retargetDensities = paramSet.FindOneBool("retargetDensities", false);
+           bool retainAspectRatio = paramSet.FindOneBool("retainAspectRatio", false);
+
+           VDB_DensityFunction* vdb_dense = new VDB_DensityFunction(vdb_filename);
+
+           vdb_dense->setWorldSpace(worldSpace);
+           vdb_dense->setClampDensities(clampDensities);
+           vdb_dense->setRetargetDensities(retargetDensities);
+           vdb_dense->setRetainAspectRatio(retainAspectRatio);
+
+           vdb_dense->setBox_Min_X(min_box[0]);
+           vdb_dense->setBox_Min_Y(min_box[1]);
+           vdb_dense->setBox_Min_Z(min_box[2]);
+           vdb_dense->setBox_Max_X(max_box[0]);
+           vdb_dense->setBox_Max_Y(max_box[1]);
+           vdb_dense->setBox_Max_Z(max_box[2]);
+
+           vdb_dense->preProcess();
+
+           density = vdb_dense;
+       }
+       #endif
+       else
+       {
+           // Warning("Medium \"%s\" unknown.", name.c_str());
+           std::cout << "Unknown Density Function" << std::endl;
+           return NULL;
+       }
+       /////////////////////////////////
+
+       // create the transmittance estimator //
+       if (transEstName == "track_length")
+       {
+           t_est = new Track_Length();
+       }
+       else if (transEstName == "ratio")
+       {
+           t_est = new Ratio();
+       }
+       else if (transEstName == "next_flight_ratio")
+       {
+           t_est = new NextFlight_Ratio();
+       }
+       else if (transEstName == "unidirectional")
+       {
+           t_est = new Unidirectional();
+       }
+       else if (transEstName == "pseries_cumulative")
+       {
+           t_est = new Pseries_Cumulative();
+       }
+       else if (transEstName == "pseries_cmf")
+       {
+           t_est = new Pseries_CMF();
+       }
+       else if (transEstName == "pseries_ratio")
+       {
+           t_est = new Pseries_Ratio();
+       }
+       else if (transEstName == "pseries_next_flight_ratio")
+       {
+           t_est = new Pseries_NextFlight_Ratio();
+       }
+       else if (transEstName == "bidirectional")
+       {
+           t_est = new Bidirectional();
+       }
+       else
+       {
+           std::cout << "Unknown Transmittance Estimator" << std::endl;
+           return NULL;
+       }
+       ////////////////////////////////////////
+
+       // create the majorant function //
+       if (majFuncName == "const")
+       {
+           maj = new ConstBoundedMajorant(density);
+       }
+       else
+       {
+           std::cout << "Unknown Majorant Function" << std::endl;
+           return NULL;
+       }
+       //////////////////////////////////
+
+       // create the sample function //
+       if (sampFuncName == "trans")
+       {
+           ff_samp = new FF_Trans_Sampler();
+       }
+       else if (sampFuncName == "absorptive")
+       {
+           ff_samp = new FF_Absorptive_Sampler();
+       }
+       else
+       {
+           std::cout << "Unknown Sample Function" << std::endl;
+           return NULL;
+       }
+       ////////////////////////////////
+
+       // create the minorant function //
+       if (minFuncName == "const")
+       {
+           min = new ConstBoundedMinorant(density);
+       }
+       else
+       {
+           std::cout << "Unknown Minorant Function" << std::endl;
+           return NULL;
+       }
+       //////////////////////////////////
+
+       if (!t_est) std::cout << "ERROR" << std::endl;
+       if (!density) std::cout << "ERROR" << std::endl;
+       if (!min) std::cout << "ERROR" << std::endl;
+       if (!maj) std::cout << "ERROR" << std::endl;
+       if (!ff_samp) std::cout << "ERROR" << std::endl;
+
+       Point3f p0 = paramSet.FindOnePoint3f("p0", Point3f(0.f, 0.f, 0.f));
+       Point3f p1 = paramSet.FindOnePoint3f("p1", Point3f(1.f, 1.f, 1.f));
+
+       Transform data2Medium = Translate(Vector3f(p0)) *
+                               Scale(p1.x - p0.x, p1.y - p0.y, p1.z - p0.z);
+
+       Transform medTrans = medium2world * data2Medium;
+
+       HeterogeneousMedium* medium = new HeterogeneousMedium(sig_a,
+                                                             sig_s,
+                                                             g,
+                                                             t_est,
+                                                             density,
+                                                             min,
+                                                             maj,
+                                                             ff_samp,
+                                                             // medToWorld,
+                                                             medium2world * data2Medium,
+                                                             mediumBounds);
+
+       medium->setMajScale(majScale);
+
+       m = medium;
+   } else
+       Warning("Medium \"%s\" unknown.", name.c_str());
     paramSet.ReportUnused();
     return std::shared_ptr<Medium>(m);
 }
@@ -1093,12 +1318,16 @@ void pbrtCamera(const std::string &name, const ParamSet &params) {
 void pbrtMakeNamedMedium(const std::string &name, const ParamSet &params) {
     VERIFY_INITIALIZED("MakeNamedMedium");
     WARN_IF_ANIMATED_TRANSFORM("MakeNamedMedium");
+    // NEW LOGIC:
+    ParamSet emptyParams;
+    TextureParams mp(emptyParams, params, *graphicsState.floatTextures,
+                     *graphicsState.spectrumTextures);
     std::string type = params.FindOneString("type", "");
     if (type == "")
         Error("No parameter string \"type\" found in MakeNamedMedium");
     else {
         std::shared_ptr<Medium> medium =
-            MakeMedium(type, params, curTransform[0]);
+            MakeMedium(type, mp, curTransform[0]);
         if (medium) renderOptions->namedMedia[name] = medium;
     }
     if (PbrtOptions.cat || PbrtOptions.toPly) {
@@ -1687,6 +1916,8 @@ Integrator *RenderOptions::MakeIntegrator() const {
         integrator = CreatePathIntegrator(IntegratorParams, sampler, camera);
     else if (IntegratorName == "volpath")
         integrator = CreateVolPathIntegrator(IntegratorParams, sampler, camera);
+    else if (IntegratorName == "volpath_recursive")
+        integrator = CreateVolPathRecursiveIntegrator(IntegratorParams, sampler, camera);
     else if (IntegratorName == "bdpt") {
         integrator = CreateBDPTIntegrator(IntegratorParams, sampler, camera);
     } else if (IntegratorName == "mlt") {
@@ -1701,6 +1932,7 @@ Integrator *RenderOptions::MakeIntegrator() const {
     }
 
     if (renderOptions->haveScatteringMedia && IntegratorName != "volpath" &&
+        IntegratorName != "volpath_recursive" &&
         IntegratorName != "bdpt" && IntegratorName != "mlt") {
         Warning(
             "Scene has scattering media but \"%s\" integrator doesn't support "

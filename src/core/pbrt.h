@@ -40,6 +40,13 @@
 
 // core/pbrt.h*
 // Global Include Files
+#define STB_IMAGE_STATIC
+#define STB_IMAGE_WRITE_STATIC
+
+#define LOGGING false
+#define OPENVDB true
+
+#include "ext/imedit/image.h"
 #include <type_traits>
 #include <algorithm>
 #include <cinttypes>
@@ -89,6 +96,8 @@
 
 // Global Macros
 #define ALLOCA(TYPE, COUNT) (TYPE *) alloca((COUNT) * sizeof(TYPE))
+
+#define TEST_SCENES_PATH "/Users/t_missz/Documents/testscenes"
 
 namespace pbrt {
 
@@ -154,6 +163,7 @@ class VisibilityTester;
 class AreaLight;
 struct Distribution1D;
 class Distribution2D;
+#define PBRT_FLOAT_AS_DOUBLE
 #ifdef PBRT_FLOAT_AS_DOUBLE
   typedef double Float;
 #else
@@ -462,6 +472,28 @@ inline Float ErfInv(Float x) {
         p = 2.83297682f + p * w;
     }
     return p * x;
+}
+
+inline Float ThreeWiseMax(Float a, Float b, Float c)
+{
+    if (a > b)
+    {
+        if (a > c) return a;
+        return c;
+    }
+    if (c > b) return c;
+    return b;
+}
+
+inline Float ThreeWiseMin(Float a, Float b, Float c)
+{
+    if (a < b)
+    {
+        if (a < c) return a;
+        return c;
+    }
+    if (c < b) return c;
+    return b;
 }
 
 inline Float Erf(Float x) {

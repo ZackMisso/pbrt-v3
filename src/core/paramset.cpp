@@ -77,6 +77,14 @@ void ParamSet::AddBool(const std::string &name, std::unique_ptr<bool[]> values,
     ADD_PARAM_TYPE(bool, bools);
 }
 
+void ParamSet::AddLong(const std::string& name,
+                        std::unique_ptr<long[]> values,
+                        int nValues)
+{
+    EraseLong(name);
+    ADD_PARAM_TYPE(long, longs);
+}
+
 void ParamSet::AddPoint2f(const std::string &name,
                           std::unique_ptr<Point2f[]> values, int nValues) {
     ErasePoint2f(name);
@@ -232,6 +240,19 @@ bool ParamSet::EraseInt(const std::string &n) {
     return false;
 }
 
+bool ParamSet::EraseLong(const std::string& n)
+{
+    for (size_t i = 0; i < longs.size(); ++i)
+    {
+        if (longs[i]->name == n)
+        {
+            longs.erase(longs.begin() + i);
+            return true;
+        }
+    }
+    return false;
+}
+
 bool ParamSet::EraseBool(const std::string &n) {
     for (size_t i = 0; i < bools.size(); ++i)
         if (bools[i]->name == n) {
@@ -345,12 +366,22 @@ const int *ParamSet::FindInt(const std::string &name, int *nValues) const {
     LOOKUP_PTR(ints);
 }
 
+const long* ParamSet::FindLong(const std::string& name, int* nValues) const
+{
+    LOOKUP_PTR(longs);
+}
+
 const bool *ParamSet::FindBool(const std::string &name, int *nValues) const {
     LOOKUP_PTR(bools);
 }
 
 int ParamSet::FindOneInt(const std::string &name, int d) const {
     LOOKUP_ONE(ints);
+}
+
+long ParamSet::FindOneLong(const std::string& name, long d) const
+{
+    LOOKUP_ONE(longs);
 }
 
 bool ParamSet::FindOneBool(const std::string &name, bool d) const {
@@ -446,6 +477,7 @@ void ParamSet::ReportUnused() const {
         if (!(v)[i]->lookedUp)                                          \
             Warning("Parameter \"%s\" not used", (v)[i]->name.c_str())
     CHECK_UNUSED(ints);
+    CHECK_UNUSED(longs);
     CHECK_UNUSED(bools);
     CHECK_UNUSED(floats);
     CHECK_UNUSED(point2fs);
@@ -461,6 +493,7 @@ void ParamSet::ReportUnused() const {
 void ParamSet::Clear() {
 #define DEL_PARAMS(name) (name).erase((name).begin(), (name).end())
     DEL_PARAMS(ints);
+    DEL_PARAMS(longs);
     DEL_PARAMS(bools);
     DEL_PARAMS(floats);
     DEL_PARAMS(point2fs);
@@ -839,6 +872,7 @@ void TextureParams::ReportUnused() const {
     geomParams.ReportUnused();
     reportUnusedMaterialParams(materialParams.ints, geomParams.ints);
     reportUnusedMaterialParams(materialParams.bools, geomParams.bools);
+    reportUnusedMaterialParams(materialParams.longs, geomParams.longs);
     reportUnusedMaterialParams(materialParams.floats, geomParams.floats);
     reportUnusedMaterialParams(materialParams.point2fs, geomParams.point2fs);
     reportUnusedMaterialParams(materialParams.vector2fs, geomParams.vector2fs);

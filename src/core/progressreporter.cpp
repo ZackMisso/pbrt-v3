@@ -43,14 +43,17 @@
 #include <errno.h>
 #endif  // !PBRT_IS_WINDOWS
 
+#include "media/heterogeneous.h"
+
 namespace pbrt {
 
 static int TerminalWidth();
 
 // ProgressReporter Method Definitions
-ProgressReporter::ProgressReporter(int64_t totalWork, const std::string &title)
+ProgressReporter::ProgressReporter(int64_t totalWork, const std::string &title, long maxTime)
     : totalWork(std::max((int64_t)1, totalWork)),
       title(title),
+      maxTime(maxTime),
       startTime(std::chrono::system_clock::now()) {
     workDone = 0;
     exitThread = false;
@@ -144,6 +147,23 @@ void ProgressReporter::PrintBar() {
             printf(" (%.1fs|?s)  ", seconds);
         fflush(stdout);
     }
+}
+
+bool ProgressReporter::continueRun(long maxDenseCalls) const {
+    Float seconds = ElapsedMS() / 1000.f;
+    if (seconds > maxTime) {
+        return false;
+    }
+    if (HeterogeneousMedium::nDensityCalls > maxDenseCalls &&
+        maxDenseCalls > 0)
+    {
+        return false;
+    }
+    return true;
+}
+
+long ProgressReporter::getCurrentTime() const {
+    return ElapsedMS() / 1000.f;
 }
 
 void ProgressReporter::Done() {

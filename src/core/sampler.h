@@ -53,6 +53,10 @@ class Sampler {
     virtual ~Sampler();
     Sampler(int64_t samplesPerPixel);
     virtual void StartPixel(const Point2i &p);
+    virtual void StartPixel(const Point2i &p,
+                            int max_x_res,
+                            int max_y_res,
+                            int multiplier);
     virtual Float Get1D() = 0;
     virtual Point2f Get2D() = 0;
     CameraSample GetCameraSample(const Point2i &pRaster);
@@ -69,6 +73,9 @@ class Sampler {
                           currentPixel.y, currentPixelSampleIndex);
     }
     int64_t CurrentSampleNumber() const { return currentPixelSampleIndex; }
+
+    virtual void BeforeTransmittanceSample() { /* to be extended if needed */ }
+    virtual void BeforeFreeFlightSample() { /* to be extended if needed */ }
 
     // Sampler Public Data
     const int64_t samplesPerPixel;

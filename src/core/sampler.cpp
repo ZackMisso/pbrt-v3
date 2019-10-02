@@ -58,6 +58,14 @@ void Sampler::StartPixel(const Point2i &p) {
     array1DOffset = array2DOffset = 0;
 }
 
+void Sampler::StartPixel(const Point2i &p,
+                         int max_x_res,
+                         int max_y_res,
+                         int multiplier)
+{
+    StartPixel(p);
+}
+
 bool Sampler::StartNextSample() {
     // Reset array offsets for next pixel sample
     array1DOffset = array2DOffset = 0;

@@ -36,6 +36,7 @@
 #include "api.h"
 #include "parser.h"
 #include "parallel.h"
+#include "experiments/fox.h"
 #include <glog/logging.h>
 
 using namespace pbrt;
@@ -158,16 +159,18 @@ int main(int argc, char *argv[]) {
         printf("See the file LICENSE.txt for the conditions of the license.\n");
         fflush(stdout);
     }
-    pbrtInit(options);
-    // Process scene description
-    if (filenames.empty()) {
-        // Parse scene from standard input
-        pbrtParseFile("-");
-    } else {
-        // Parse scene from input files
-        for (const std::string &f : filenames)
-            pbrtParseFile(f);
-    }
-    pbrtCleanup();
+    // pbrtInit(options);
+
+    new Fox_Scene(options);
+    // // Process scene description
+    // if (filenames.empty()) {
+    //     // Parse scene from standard input
+    //     pbrtParseFile("-");
+    // } else {
+    //     // Parse scene from input files
+    //     for (const std::string &f : filenames)
+    //         pbrtParseFile(f);
+    // }
+    // pbrtCleanup();
     return 0;
 }

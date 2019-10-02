@@ -136,6 +136,14 @@ class Texture {
   public:
     // Texture Interface
     virtual T Evaluate(const SurfaceInteraction &) const = 0;
+    virtual T Evaluate(const Point3f &) const { return (T)0.0; }
+
+    virtual T Max() const { return (T)1.0; };
+    virtual T Min() const { return (T)0.0; };
+
+    virtual void preProcess(const Transform& medToWorld,
+                            const Bounds3f& bounds) { };
+
     virtual ~Texture() {}
 };
 

@@ -55,6 +55,11 @@ RGBSpectrum *ReadImageEXR(const std::string &name, int *width,
 void WriteImage(const std::string &name, const Float *rgb,
                 const Bounds2i &outputBounds, const Point2i &totalResolution);
 
+void WriteRenderData(const std::string& name,
+                     const std::string& time,
+                     long extCalls,
+                     int samples);
+
 }  // namespace pbrt
 
 #endif  // PBRT_CORE_IMAGEIO_H

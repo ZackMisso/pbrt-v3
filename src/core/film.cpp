@@ -36,6 +36,7 @@
 #include "paramset.h"
 #include "imageio.h"
 #include "stats.h"
+#include "media/heterogeneous.h"
 
 namespace pbrt {
 
@@ -208,6 +209,58 @@ void Film::WriteImage(Float splatScale) {
     LOG(INFO) << "Writing image " << filename << " with bounds " <<
         croppedPixelBounds;
     pbrt::WriteImage(filename, &rgb[0], croppedPixelBounds, fullResolution);
+}
+
+void Film::WriteImage(long currentTime, int pix, int current_sample, Float splatScale) {
+    // Convert image to RGB and compute final pixel values
+    std::unique_ptr<Float[]> rgb(new Float[3 * croppedPixelBounds.Area()]);
+    int offset = 0;
+    for (Point2i p : croppedPixelBounds) {
+        // Convert pixel XYZ color to RGB
+        Pixel &pixel = GetPixel(p);
+        XYZToRGB(pixel.xyz, &rgb[3 * offset]);
+
+        // Normalize pixel with weight sum
+        Float filterWeightSum = pixel.filterWeightSum;
+        bool debug = false;
+        if (filterWeightSum != 0) {
+            Float invWt = (Float)1 / filterWeightSum;
+
+            rgb[3 * offset] = rgb[3 * offset] * invWt;
+            rgb[3 * offset + 1] = rgb[3 * offset + 1] * invWt;
+            rgb[3 * offset + 2] = rgb[3 * offset + 2] * invWt;
+        }
+
+        // Add splat value at pixel
+        Float splatRGB[3];
+        Float splatXYZ[3] = {pixel.splatXYZ[0], pixel.splatXYZ[1],
+                             pixel.splatXYZ[2]};
+        XYZToRGB(splatXYZ, splatRGB);
+        rgb[3 * offset] += splatScale * splatRGB[0];
+        rgb[3 * offset + 1] += splatScale * splatRGB[1];
+        rgb[3 * offset + 2] += splatScale * splatRGB[2];
+
+        rgb[3 * offset] *= scale;
+        rgb[3 * offset + 1] *= scale;
+        rgb[3 * offset + 2] *= scale;
+        ++offset;
+    }
+
+    if (pix == -1)
+    {
+        pbrt::WriteImage(filename + ".png", &rgb[0], croppedPixelBounds, fullResolution);
+        // pbrt::WriteImage(filename + ".exr", &rgb[0], croppedPixelBounds, fullResolution);
+        // pbrt::WriteImage(filename + ".hdr", &rgb[0], croppedPixelBounds, fullResolution);
+        pbrt::WriteImage(filename + ".exr", &rgb[0], croppedPixelBounds, fullResolution);
+        // std::cout << "Huh: " << filename << std::endl;
+        pbrt::WriteRenderData(filename + "_info.txt", std::to_string(currentTime), HeterogeneousMedium::nDensityCalls, current_sample);
+    }
+    else
+    {
+        pbrt::WriteImage("pixsamples_" + std::to_string(pix) + "_" + filename + ".png", &rgb[0], croppedPixelBounds, fullResolution);
+        pbrt::WriteImage("pixsamples_" + std::to_string(pix) + "_" + filename + ".hdr", &rgb[0], croppedPixelBounds, fullResolution);
+        pbrt::WriteImage("pixsamples_" + std::to_string(pix) + "_" + filename + ".exr", &rgb[0], croppedPixelBounds, fullResolution);
+    }
 }
 
 Film *CreateFilm(const ParamSet &params, std::unique_ptr<Filter> filter) {

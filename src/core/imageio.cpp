@@ -36,6 +36,7 @@
 #include "ext/targa.h"
 #include "fileutil.h"
 #include "spectrum.h"
+#include <fstream>
 
 #include <ImfRgba.h>
 #include <ImfRgbaFile.h>
@@ -119,6 +120,18 @@ void WriteImage(const std::string &name, const Float *rgb,
         Error("Can't determine image file type from suffix of filename \"%s\"",
               name.c_str());
     }
+}
+
+void WriteRenderData(const std::string& name,
+                     const std::string& time,
+                     long extCalls,
+                     int samples)
+{
+    std::ofstream outputFile(name);
+    outputFile << time << std::endl;
+    outputFile << extCalls << std::endl;
+    outputFile << samples << std::endl;
+    outputFile.close();
 }
 
 RGBSpectrum *ReadImageEXR(const std::string &name, int *width, int *height,

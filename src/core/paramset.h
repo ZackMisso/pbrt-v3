@@ -57,6 +57,7 @@ class ParamSet {
     void AddFloat(const std::string &, std::unique_ptr<Float[]> v,
                   int nValues = 1);
     void AddInt(const std::string &, std::unique_ptr<int[]> v, int nValues);
+    void AddLong(const std::string &, std::unique_ptr<long[]> v, int nValues);
     void AddBool(const std::string &, std::unique_ptr<bool[]> v, int nValues);
     void AddPoint2f(const std::string &, std::unique_ptr<Point2f[]> v,
                     int nValues);
@@ -82,6 +83,7 @@ class ParamSet {
     void AddSampledSpectrum(const std::string &, std::unique_ptr<Float[]> v,
                             int nValues);
     bool EraseInt(const std::string &);
+    bool EraseLong(const std::string &);
     bool EraseBool(const std::string &);
     bool EraseFloat(const std::string &);
     bool ErasePoint2f(const std::string &);
@@ -94,6 +96,7 @@ class ParamSet {
     bool EraseTexture(const std::string &);
     Float FindOneFloat(const std::string &, Float d) const;
     int FindOneInt(const std::string &, int d) const;
+    long FindOneLong(const std::string &, long d) const;
     bool FindOneBool(const std::string &, bool d) const;
     Point2f FindOnePoint2f(const std::string &, const Point2f &d) const;
     Vector2f FindOneVector2f(const std::string &, const Vector2f &d) const;
@@ -107,6 +110,7 @@ class ParamSet {
     std::string FindTexture(const std::string &) const;
     const Float *FindFloat(const std::string &, int *n) const;
     const int *FindInt(const std::string &, int *nValues) const;
+    const long* FindLong(const std::string &, int* nValues) const;
     const bool *FindBool(const std::string &, int *nValues) const;
     const Point2f *FindPoint2f(const std::string &, int *nValues) const;
     const Vector2f *FindVector2f(const std::string &, int *nValues) const;
@@ -127,6 +131,7 @@ class ParamSet {
     // ParamSet Private Data
     std::vector<std::shared_ptr<ParamSetItem<bool>>> bools;
     std::vector<std::shared_ptr<ParamSetItem<int>>> ints;
+    std::vector<std::shared_ptr<ParamSetItem<long>>> longs;
     std::vector<std::shared_ptr<ParamSetItem<Float>>> floats;
     std::vector<std::shared_ptr<ParamSetItem<Point2f>>> point2fs;
     std::vector<std::shared_ptr<ParamSetItem<Vector2f>>> vector2fs;

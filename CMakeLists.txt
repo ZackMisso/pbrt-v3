@@ -199,7 +199,7 @@ int main() {
    fstat(fd, &s);
    size_t len = s.st_size;
    void *ptr = mmap(0, len, PROT_READ, MAP_FILE | MAP_SHARED, fd, 0);
-   munmap(ptr, len);   
+   munmap(ptr, len);
 }
 " HAVE_MMAP )
 if ( HAVE_MMAP )
@@ -453,6 +453,7 @@ FILE ( GLOB PBRT_SOURCE
   src/ext/*
   src/accelerators/*
   src/cameras/*
+  src/experiments/*
   src/filters/*
   src/integrators/*
   src/lights/*
@@ -461,6 +462,13 @@ FILE ( GLOB PBRT_SOURCE
   src/shapes/*
   src/textures/*
   src/media/*
+  src/media/density/*
+  src/media/ff_samplers/*
+  src/media/majorant/*
+  src/media/minorant/*
+  src/media/trans_ests/*
+  src/procedural_media/*
+  src/trans_samplers/*
   )
 
 INCLUDE_DIRECTORIES ( src )
@@ -516,6 +524,8 @@ SET(ALL_PBRT_LIBS
   glog
   Ptex_static
   ${ZLIB_LIBRARY}
+  tbb
+  openvdb
 )
 
 # Main renderer

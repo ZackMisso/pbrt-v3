@@ -245,6 +245,12 @@ class CoefficientSpectrum {
         DCHECK(!ret.HasNaNs());
         return ret;
     }
+    Float MaxAbsComponentValue() const {
+        Float m = std::abs(c[0]);
+        for (int i = 1; i < nSpectrumSamples; ++i)
+            m = std::max(m, std::abs(c[i]));
+        return m;
+    }
     Float MaxComponentValue() const {
         Float m = c[0];
         for (int i = 1; i < nSpectrumSamples; ++i)

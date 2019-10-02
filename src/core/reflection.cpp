@@ -510,6 +510,46 @@ Spectrum FresnelSpecular::Sample_f(const Vector3f &wo, Vector3f *wi,
     }
 }
 
+Spectrum FresnelSpecular::Sample_refl(const Vector3f& wo,
+                                      Vector3f* wi,
+                                      const Point2f& sample,
+                                      Float* contrib,
+                                      BxDFType* sampledType) const
+{
+    Float F = FrDielectric(CosTheta(wo), etaA, etaB);
+
+    if (sampledType) *sampledType = BxDFType(BSDF_SPECULAR | BSDF_REFLECTION);
+    *wi = Vector3f(-wo.x, -wo.y, wo.z);
+
+    return F * R / AbsCosTheta(*wi);
+}
+
+Spectrum FresnelSpecular::Sample_refr(const Vector3f& wo,
+                                      Vector3f* wi,
+                                      const Point2f& sample,
+                                      Float* contrib,
+                                      BxDFType* sampledType) const
+{
+    Float F = FrDielectric(CosTheta(wo), etaA, etaB);
+
+    bool entering = CosTheta(wo) > 0;
+    Float etaI = entering ? etaA : etaB;
+    Float etaT = entering ? etaB : etaA;
+
+    // Compute ray direction for specular transmission
+    if (!Refract(wo, Faceforward(Normal3f(0, 0, 1), wo), etaI / etaT, wi))
+        return 0;
+
+    Spectrum ft = T * (1 - F);
+
+    // Account for non-symmetry with transmission to different medium
+    if (mode == TransportMode::Radiance) ft *= (etaI * etaI) / (etaT * etaT);
+
+    if (sampledType) *sampledType = BxDFType(BSDF_SPECULAR | BSDF_TRANSMISSION);
+
+    return ft / AbsCosTheta(*wi);
+}
+
 std::string FresnelSpecular::ToString() const {
     return std::string("[ FresnelSpecular R: ") + R.ToString() +
            std::string(" T: ") + T.ToString() +
@@ -766,6 +806,46 @@ Spectrum BSDF::Sample_f(const Vector3f &woWorld, Vector3f *wiWorld,
     VLOG(2) << "Overall f = " << f << ", pdf = " << *pdf << ", ratio = "
             << ((*pdf > 0) ? (f / *pdf) : Spectrum(0.));
     return f;
+}
+
+Spectrum BSDF::Sample_refl(const Vector3f& wo,
+                           Vector3f* wi,
+                           const Point2f& sample,
+                           Float* contrib,
+                           BxDFType* sampledType) const
+{
+    Vector3f woLocal = WorldToLocal(wo);
+    if (wo.z == 0) return 0.0;
+
+    // if (nBxDFs != 1) std::cout << "ERROR: Not Supported multiple BxDFs" << std::endl;
+
+    Spectrum ret = bxdfs[0]->Sample_refl(woLocal, wi, sample, contrib, sampledType);
+
+    *wi = LocalToWorld(*wi);
+
+    return ret;
+
+    // TODO: make correct for all cases
+}
+
+Spectrum BSDF::Sample_refr(const Vector3f& wo,
+                           Vector3f* wi,
+                           const Point2f& sample,
+                           Float* contrib,
+                           BxDFType* sampledType) const
+{
+    Vector3f woLocal = WorldToLocal(wo);
+    if (wo.z == 0) return 0.0;
+
+    // if (nBxDFs != 1) std::cout << "ERROR: Not Supported multiple BxDFs" << std::endl;
+
+    Spectrum ret = bxdfs[0]->Sample_refr(woLocal, wi, sample, contrib, sampledType);
+
+    *wi = LocalToWorld(*wi);
+
+    return ret;
+
+    // TODO: make correct for all cases
 }
 
 Float BSDF::Pdf(const Vector3f &woWorld, const Vector3f &wiWorld,
