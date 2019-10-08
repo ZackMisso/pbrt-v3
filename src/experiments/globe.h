@@ -8,7 +8,7 @@
 class Globe_Scene : public ExperimentBase
 {
 public:
-    Globe_Scene(pbrt::Options options);
+    Globe_Scene(pbrt::Options options, ExperimentFlags flags);
 
     void runTest(pbrt::Options options,
                  std::string transType,
@@ -20,6 +20,16 @@ public:
                             std::string transType,
                             Float majorant,
                             long samples);
+
+    void runEqualSampleRenders(pbrt::Options options,
+                               std::string transType,
+                               Float majorant,
+                               long samples);
+
+    void runEqualSampleStratifiedRenders(pbrt::Options options,
+                                         std::string transType,
+                                         Float majorant,
+                                         long samples);
 
     void initializeSceneMediumBox(std::string transType,
                                   std::string name,

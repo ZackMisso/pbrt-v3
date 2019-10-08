@@ -6,7 +6,7 @@
 class Teaser : public ExperimentBase
 {
 public:
-    Teaser(pbrt::Options options);
+    Teaser(pbrt::Options options, ExperimentFlags flags);
 
     void runTest(pbrt::Options options,
                  std::string transType,

@@ -5,7 +5,7 @@
 class Fox_Scene : public ExperimentBase
 {
 public:
-    Fox_Scene(pbrt::Options options);
+    Fox_Scene(pbrt::Options options, ExperimentFlags flags);
 
     void runTest(pbrt::Options options, std::string transType, bool isGT, double angle, double psi, int iter);
     void runTest(std::string transType, bool isGT);

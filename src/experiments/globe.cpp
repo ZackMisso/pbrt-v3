@@ -2,37 +2,57 @@
 
 #if OPENVDB
 
-Globe_Scene::Globe_Scene(pbrt::Options options)
+Globe_Scene::Globe_Scene(pbrt::Options options, ExperimentFlags flags)
 {
-    std::vector<Float> majorants = std::vector<Float>();
-    majorants.push_back(1.0);
-    majorants.push_back(5.0);
+    std::string mk_loc = "mkdir globe_figure";
+    std::system(mk_loc.c_str());
 
-    std::vector<long> const_extCalls = std::vector<long>();
-    const_extCalls.push_back(125425539L * 4L);
-    const_extCalls.push_back(646556548L * 2L);
-
-    std::vector<std::string> estimators = std::vector<std::string>();
-    estimators.push_back("track_length");
-    estimators.push_back("ratio");
-    estimators.push_back("next_flight_ratio");
-    estimators.push_back("unidirectional");
-    estimators.push_back("pseries_cumulative");
-    estimators.push_back("pseries_cdf");
-    estimators.push_back("pseries_ratio");
-    estimators.push_back("pseries_next_flight_ratio");
-    estimators.push_back("pseries_interp");
-    estimators.push_back("bidirectional");
-
-    // equal ext call renders
-    for (int j = 0; j < const_extCalls.size(); ++j)
+    if (flags.run_equal_extinctions)
     {
-        for (int i = 0; i < estimators.size(); ++i)
+        // equal ext call renders
+        for (int j = 0; j < flags.ext_calls.size(); ++j)
         {
-            std::string mk_loc = "mkdir /Users/corneria/Documents/Research/pbrttest/build_final/globe_figure/" + std::to_string(majorants[j]);
-            std::system(mk_loc.c_str());
+            for (int i = 0; i < flags.estimators.size(); ++i)
+            {
+                std::string mk_loc = "mkdir globe_figure/" + std::to_string(flags.majorants[j]);
+                std::system(mk_loc.c_str());
 
-            runEqualExtRenders(options, estimators[i], majorants[j], const_extCalls[j]);
+                runEqualExtRenders(options, flags.estimators[i], flags.majorants[j], flags.ext_calls[j]);
+            }
+        }
+    }
+
+    if (flags.run_equal_samples)
+    {
+        mk_loc = "mkdir globe_figure_strat";
+        std::system(mk_loc.c_str());
+
+        for (int j = 0; j < flags.spp.size(); ++j)
+        {
+            for (int i = 0; i < flags.estimators.size(); ++i)
+            {
+                std::string mk_loc = "mkdir globe_figure_strat/" + std::to_string(flags.majorants[j]) + "_rand";
+                std::system(mk_loc.c_str());
+
+                runEqualSampleRenders(options, flags.estimators[i], flags.majorants[j], flags.ext_calls[j]);
+            }
+        }
+    }
+
+    if (flags.run_stratified_samples)
+    {
+        mk_loc = "mkdir globe_figure_strat";
+        std::system(mk_loc.c_str());
+
+        for (int j = 0; j < flags.spp.size(); ++j)
+        {
+            for (int i = 0; i < flags.estimators.size(); ++i)
+            {
+                std::string mk_loc = "mkdir globe_figure_strat/" + std::to_string(flags.majorants[j]) + "_strat";
+                std::system(mk_loc.c_str());
+
+                runEqualSampleStratifiedRenders(options, flags.estimators[i], flags.majorants[j], flags.ext_calls[j]);
+            }
         }
     }
 }
@@ -44,13 +64,8 @@ void Globe_Scene::initializeSceneMediumBox(std::string transType,
 {
     pbrtAttributeBegin();
 
-    // I hope this works
     pbrtScale(60.0, 60.0, 60.0);
     pbrtTranslate(0.0, 0.0, 0.5);
-
-    // initializeGlass(std::vector<Float>{1.0, 1.0, 1.0},
-    //                 std::vector<Float>{1.0, 1.0, 1.0},
-    //                 1.5);
 
     pbrtTranslate(-0.02, 0.0, 0.0);
 
@@ -82,15 +97,6 @@ void Globe_Scene::initializeSceneMediumBox(std::string transType,
                     1.5);
     initializeSphereShape(0.75);
 
-    // pbrtMaterial("", ParamSet());
-    // pbrtMediumInterface("vol", "");
-
-    // debugging logic
-    // initializeMaterial_Matte(std::vector<Float>{1.0, 0.0, 0.0});
-
-    // NOTE: These have to be the same as the min bounds
-    // initializeBoxShape(min, max, min, max, min, max);
-
     pbrtAttributeEnd();
 }
 
@@ -98,8 +104,8 @@ void Globe_Scene::runTest(pbrt::Options options, std::string transType, bool isG
 {
     pbrtInit(options);
 
-    SetSearchDirectory(DirectoryContaining("/Users/corneria/Documents/Research/testscenes/sphere_smoke/dragon_10.pbrt"));
-    exp_path = "/Users/corneria/Documents/Research/testscenes/sphere_smoke/";
+    SetSearchDirectory(DirectoryContaining(TEST_SCENES_PATH "/sphere_smoke/dragon_10.pbrt"));
+    exp_path = TEST_SCENES_PATH "/sphere_smoke/";
 
     initializeIntegrator(200000000,
                          // 100000000,
@@ -154,21 +160,19 @@ void Globe_Scene::runTest(pbrt::Options options, std::string transType, bool isG
 }
 
 void Globe_Scene::runEqualExtRenders(pbrt::Options options,
-                                            std::string transType,
-                                            Float majorant,
-                                            long samples)
+                                     std::string transType,
+                                     Float majorant,
+                                     long samples)
 {
     pbrtInit(options);
 
-    SetSearchDirectory(DirectoryContaining("/Users/corneria/Documents/Research/testscenes/sphere_smoke/dragon_10.pbrt"));
-    exp_path = "/Users/corneria/Documents/Research/testscenes/sphere_smoke/";
+    SetSearchDirectory(DirectoryContaining(TEST_SCENES_PATH "/sphere_smoke/dragon_10.pbrt"));
+    exp_path = TEST_SCENES_PATH "/sphere_smoke/";
 
     initializeIntegrator(200000000,
                          samples,
-                         // -1,
                          5,
                          "volpath_recursive",
-                         //"volpath",
                          "independent",
                          "independent",
                          false,
@@ -178,8 +182,123 @@ void Globe_Scene::runEqualExtRenders(pbrt::Options options,
 
     initializePixelFilter("box");
 
-    initializeFilm("sphere_figure/" + std::to_string(majorant) + "/" + transType,
-                   //"better_smoke_test_60",
+    initializeFilm("globe_figure/" + std::to_string(majorant) + "/" + transType,
+                   800,
+                   800);
+
+    pbrtScale(-1.0, 1.0, 1.0);
+
+    pbrtLookAt(90.0, -110.0, 40.5,
+               0.0, 0.0, 33.0, // was at .4
+               0.0, 0.0, 1.0);
+
+    initializeCamera("perspective", 40); // was at 30
+
+    pbrtWorldBegin();
+
+    initializeLightSources();
+
+    pbrtAttributeBegin();
+    initializeMaterial_Matte(std::vector<Float>{0.56, 0.56, 0.56});
+    pbrtRotate(135.0, 0.0, 0.0, 1.0);
+    pbrtTranslate(0.0, 0.0, -30.0);
+
+    pbrtScale(60.0, 300.0, 300.0);
+    initializePlyShape("geometry/photo_backdrop_smooth_2.ply");
+    pbrtAttributeEnd();
+
+    initializeSceneMediumBox(transType,
+                             "wdas_cloud.vdb",
+                             "const",
+                             majorant);
+
+    pbrtWorldEnd();
+
+    pbrtCleanup();
+}
+
+void Globe_Scene::runEqualSampleRenders(pbrt::Options options,
+                                        std::string transType,
+                                        Float majorant,
+                                        long samples)
+{
+    pbrtInit(options);
+
+    SetSearchDirectory(DirectoryContaining(TEST_SCENES_PATH "/sphere_smoke/dragon_10.pbrt"));
+    exp_path = TEST_SCENES_PATH "/sphere_smoke/";
+
+    initializeIntegrator(200000000,
+                         -1,
+                         5,
+                         "volpath_recursive",
+                         "independent",
+                         "independent",
+                         false,
+                         false);
+
+    initializeSampler("random", samples);
+
+    initializePixelFilter("box");
+
+    initializeFilm("globe_figure_strat/" + std::to_string(majorant) + "/_rand" + transType + "_rand",
+                   800,
+                   800);
+
+    pbrtScale(-1.0, 1.0, 1.0);
+
+    pbrtLookAt(90.0, -110.0, 40.5,
+               0.0, 0.0, 33.0, // was at .4
+               0.0, 0.0, 1.0);
+
+    initializeCamera("perspective", 40); // was at 30
+
+    pbrtWorldBegin();
+
+    initializeLightSources();
+
+    pbrtAttributeBegin();
+    initializeMaterial_Matte(std::vector<Float>{0.56, 0.56, 0.56});
+    pbrtRotate(135.0, 0.0, 0.0, 1.0);
+    pbrtTranslate(0.0, 0.0, -30.0);
+
+    pbrtScale(60.0, 300.0, 300.0);
+    initializePlyShape("geometry/photo_backdrop_smooth_2.ply");
+    pbrtAttributeEnd();
+
+    initializeSceneMediumBox(transType,
+                             "wdas_cloud.vdb",
+                             "const",
+                             majorant);
+
+    pbrtWorldEnd();
+
+    pbrtCleanup();
+}
+
+void Globe_Scene::runEqualSampleStratifiedRenders(pbrt::Options options,
+                                                  std::string transType,
+                                                  Float majorant,
+                                                  long samples)
+{
+    pbrtInit(options);
+
+    SetSearchDirectory(DirectoryContaining(TEST_SCENES_PATH "/sphere_smoke/dragon_10.pbrt"));
+    exp_path = TEST_SCENES_PATH "/sphere_smoke/";
+
+    initializeIntegrator(200000000,
+                         -1,
+                         5,
+                         "volpath_recursive",
+                         "independent",
+                         "independent",
+                         false,
+                         false);
+
+    initializeSampler("random", samples);
+
+    initializePixelFilter("box");
+
+    initializeFilm("globe_figure_strat/" + std::to_string(majorant) + "_strat/" + transType + "_strat",
                    800,
                    800);
 

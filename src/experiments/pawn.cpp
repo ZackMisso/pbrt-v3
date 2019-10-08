@@ -21,7 +21,7 @@
 // Generate 0.10 Pawn Renders - 106761653
 // Generate 0.05 Pawn Renders - 205660437
 
-Pawn_Scene::Pawn_Scene(pbrt::Options options)
+Pawn_Scene::Pawn_Scene(pbrt::Options options, ExperimentFlags flags)
 {
     // std::vector<Float> majToTest = std::vector<Float>{
     //     1.0, 1.1, 1.2, 1.3, 10.0,

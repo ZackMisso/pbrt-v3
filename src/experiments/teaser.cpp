@@ -1,6 +1,6 @@
 #include "teaser.h"
 
-Teaser::Teaser(pbrt::Options options)
+Teaser::Teaser(pbrt::Options options, ExperimentFlags flags)
 {
     // runTest(options, "ratio", true);
     runTest(options, "ratio", false);

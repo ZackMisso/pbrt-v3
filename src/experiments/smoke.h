@@ -7,7 +7,7 @@
 class Smoke_Scene : public ExperimentBase
 {
 public:
-    Smoke_Scene(pbrt::Options options);
+    Smoke_Scene(pbrt::Options options, ExperimentFlags flags);
 
     void runTest(std::string transType, bool isGT, std::string name, int iter);
 

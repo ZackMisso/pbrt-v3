@@ -1,6 +1,6 @@
 #include "fox.h"
 
-Fox_Scene::Fox_Scene(pbrt::Options options)
+Fox_Scene::Fox_Scene(pbrt::Options options, ExperimentFlags flags)
 {
     int maxi = 30 * 30;
     int index = 605 % 30;
@@ -8,154 +8,56 @@ Fox_Scene::Fox_Scene(pbrt::Options options)
     double angle = 6.28 * double(index) / 30.0;
     double psi = double(psi_index) / 30.0;
 
-    // runTest("track_length", false, angle, psi, 605);
-    // runTest(options, "ratio", true, angle, psi, 605);
+    std::string mk_loc = "mkdir fox_figure";
+    std::system(mk_loc.c_str());
 
-    // int maxi = 30 * 30;
-    // for (int i = 605; i < 606; ++i)
-    // {
-    //     int index = i % 30;
-    //     int psi_index = i / 30;
-    //     double angle = 6.28 * double(index) / 30.0;
-    //     double psi = double(psi_index) / 30.0;
-    //     runTest("ratio", true, angle, psi, i);
-    // }
-
-    std::vector<Float> majorants = std::vector<Float>();
-
-//     majorants.push_back(0.1);
-//     // majorants.push_back(0.2);
-//     majorants.push_back(0.3);
-//     // majorants.push_back(0.4);
-//
-//     // majorants.push_back(0.5);
-//     majorants.push_back(0.6);
-//     // majorants.push_back(0.7);
-//     // majorants.push_back(0.8);
-//     // majorants.push_back(0.9);
-// //
-//     majorants.push_back(1.0);
-//     majorants.push_back(1.5);
-//     majorants.push_back(2.0);
-//     // majorants.push_back(2.5);
-//     // majorants.push_back(3.5);
-//
-//     majorants.push_back(5.0);
-//     // majorants.push_back(7.5);
-//     majorants.push_back(10.0);
-//     // majorants.push_back(15.0);
-//     // majorants.push_back(20.0);
-
-    // majorants.push_back(0.1);
-    // majorants.push_back(0.3);
-    // majorants.push_back(0.6);
-    majorants.push_back(1.0);
-    // majorants.push_back(1.5);
-    // majorants.push_back(2.5);
-    // majorants.push_back(5.0);
-
-    std::vector<Float> extCalls = std::vector<Float>();
-    // extCalls.push_back(5965499 * 8);
-    // // extCalls.push_back(7265499 * 8);
-    // extCalls.push_back(8965499 * 8);
-    // // extCalls.push_back(10065499 * 8);
-    // // extCalls.push_back(12965499 * 3);
-    // extCalls.push_back(16055417 * 3);
-    // // extCalls.push_back(19192619 * 3);
-    // // extCalls.push_back(22354414 * 3);
-    // // extCalls.push_back(25543645 * 3);
-    // extCalls.push_back(28745021 * 3);
-    // extCalls.push_back(44924520 * 2);
-    // extCalls.push_back(61275672 * 2);
-    // // extCalls.push_back(77719541 * 2);
-    // // extCalls.push_back(110752636 * 2);
-    // extCalls.push_back(160525061 * 2);
-    // // extCalls.push_back(243756923 * 2);
-    // extCalls.push_back(327155702 * 2);
-    // // extCalls.push_back(494208588 * 2);
-    // // extCalls.push_back(661431711 * 2);
-
-    // use these
-    // extCalls.push_back(5965499 * 8);
-    // extCalls.push_back(8965499 * 8);
-    // extCalls.push_back(16055417 * 3);
-    extCalls.push_back(28745021 * 3);
-    // extCalls.push_back(44924520 * 2);
-    // extCalls.push_back(77719541 * 2);
-    // extCalls.push_back(160525061 * 2);
-
-    std::vector<Float> equalSamples = std::vector<Float>();
-    equalSamples.push_back(8);
-    // equalSamples.push_back(8);
-    // equalSamples.push_back(8);
-    // equalSamples.push_back(8);
-
-    // equalSamples.push_back(8);
-    // equalSamples.push_back(8);
-    // equalSamples.push_back(8);
-    // equalSamples.push_back(8);
-    // equalSamples.push_back(8);
-
-    // equalSamples.push_back(8);
-    // equalSamples.push_back(8);
-    // equalSamples.push_back(8);
-    // equalSamples.push_back(8);
-    // equalSamples.push_back(8);
-
-    // equalSamples.push_back(8);
-    // equalSamples.push_back(8);
-    // equalSamples.push_back(8);
-    // equalSamples.push_back(8);
-    // equalSamples.push_back(8);
-
-    std::vector<std::string> estimators = std::vector<std::string>();
-    estimators.push_back("track_length");
-    estimators.push_back("ratio");
-    estimators.push_back("next_flight_ratio");
-    estimators.push_back("unidirectional");
-    estimators.push_back("pseries_cumulative");
-    estimators.push_back("pseries_cdf");
-    // estimators.push_back("pseries_rr");
-    estimators.push_back("pseries_ratio");
-    estimators.push_back("pseries_next_flight_ratio");
-    // estimators.push_back("pseries_interp");
-    estimators.push_back("bidirectional");
-
-    // // equal ext call renders
-    for (int j = 0; j < extCalls.size(); ++j)
+    if (flags.run_equal_extinctions)
     {
-        for (int i = 0; i < estimators.size(); ++i)
+        for (int j = 0; j < flags.ext_calls.size(); ++j)
         {
-            std::string mk_loc = "mkdir fox_figure/" + std::to_string(majorants[j]);
-            std::system(mk_loc.c_str());
+            for (int i = 0; i < flags.estimators.size(); ++i)
+            {
+                mk_loc = "mkdir fox_figure/" + std::to_string(flags.majorants[j]);
+                std::system(mk_loc.c_str());
 
-            runEqualExtRenders(options, estimators[i], false, angle, psi, 605, majorants[j], extCalls[j]);
+                runEqualExtRenders(options, flags.estimators[i], false, angle, psi, 605, flags.majorants[j], flags.ext_calls[j]);
+            }
         }
     }
-    //
-    // // equal random pixel samples
-    // for (int j = 0; j < equalSamples.size(); ++j)
-    // {
-    //     for (int i = 0; i < estimators.size(); ++i)
-    //     {
-    //         std::string mk_loc = "mkdir /Users/corneria/Documents/Research/pbrttest/build_final/fox_figure_strat/" + std::to_string(majorants[j]) + "_rand";
-    //         std::system(mk_loc.c_str());
-    //
-    //         runEqualSampleRenders(options, estimators[i], false, angle, psi, 605, majorants[j], equalSamples[j]);
-    //     }
-    // }
-    //
-    // // equal stratified pixel samples
-    // for (int j = 0; j < equalSamples.size(); ++j)
-    // {
-    //     for (int i = 0; i < estimators.size(); ++i)
-    //     {
-    //         std::string mk_loc = "mkdir /Users/corneria/Documents/Research/pbrttest/build_final/fox_figure_strat/" + std::to_string(majorants[j]) + "_strat";
-    //         std::system(mk_loc.c_str());
-    //
-    //         runEqualSampleStratifiedRenders(options, estimators[i], false, angle, psi, 605, majorants[j], equalSamples[j]);
-    //     }
-    // }
+
+    if (flags.run_equal_samples)
+    {
+        mk_loc = "mkdir fox_figure_strat";
+        std::system(mk_loc.c_str());
+
+        for (int j = 0; j < flags.spp.size(); ++j)
+        {
+            for (int i = 0; i < flags.estimators.size(); ++i)
+            {
+                std::string mk_loc = "mkdir fox_figure_strat/" + std::to_string(flags.majorants[j]) + "_rand";
+                std::system(mk_loc.c_str());
+
+                runEqualSampleRenders(options, flags.estimators[i], false, angle, psi, 605, flags.majorants[j], flags.spp[j]);
+            }
+        }
+    }
+
+    if (flags.run_stratified_samples)
+    {
+        mk_loc = "mkdir fox_figure_strat";
+        std::system(mk_loc.c_str());
+
+        for (int j = 0; j < flags.spp.size(); ++j)
+        {
+            for (int i = 0; i < flags.estimators.size(); ++i)
+            {
+                std::string mk_loc = "mkdir fox_figure_strat/" + std::to_string(flags.majorants[j]) + "_strat";
+                std::system(mk_loc.c_str());
+
+                runEqualSampleStratifiedRenders(options, flags.estimators[i], false, angle, psi, 605, flags.majorants[j], flags.spp[j]);
+            }
+        }
+    }
 }
 
 void Fox_Scene::runTest(pbrt::Options options, std::string transType, bool isGT, double angle, double psi, int iter)
@@ -350,8 +252,8 @@ void Fox_Scene::runEqualSampleRenders(pbrt::Options options,
 {
     pbrtInit(options);
 
-    SetSearchDirectory(DirectoryContaining("/Users/corneria/Documents/Research/testscenes/fennec_fox/teapot.pbrt"));
-    exp_path = "/Users/corneria/Documents/Research/testscenes/fennec_fox/";
+    SetSearchDirectory(DirectoryContaining(TEST_SCENES_PATH "/fennec_fox/teapot.pbrt"));
+    exp_path = TEST_SCENES_PATH "/fennec_fox/";
 
     double xpos = 65.0 / cos(3.141569 / 4.0) * cos(angle) + 8.0;
     double ypos = 65.0 / cos(3.141569 / 4.0) * sin(angle) + 12.0;
@@ -439,8 +341,8 @@ void Fox_Scene::runEqualSampleStratifiedRenders(pbrt::Options options,
 {
     pbrtInit(options);
 
-    SetSearchDirectory(DirectoryContaining("/Users/corneria/Documents/Research/testscenes/fennec_fox/teapot.pbrt"));
-    exp_path = "/Users/corneria/Documents/Research/testscenes/fennec_fox/";
+    SetSearchDirectory(DirectoryContaining(TEST_SCENES_PATH "/fennec_fox/teapot.pbrt"));
+    exp_path = TEST_SCENES_PATH "/fennec_fox/";
 
     double xpos = 65.0 / cos(3.141569 / 4.0) * cos(angle) + 8.0;
     double ypos = 65.0 / cos(3.141569 / 4.0) * sin(angle) + 12.0;

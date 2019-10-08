@@ -5,7 +5,7 @@
 class Pawn_Scene : public ExperimentBase
 {
 public:
-    Pawn_Scene(pbrt::Options options);
+    Pawn_Scene(pbrt::Options options, ExperimentFlags flags);
 
     void runTest(pbrt::Options options, std::string transType, Float majScale);
 

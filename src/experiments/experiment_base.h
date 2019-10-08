@@ -6,6 +6,33 @@
 
 using namespace pbrt;
 
+struct ExperimentFlags
+{
+    ExperimentFlags()
+    {
+        estimators = std::vector<std::string>();
+        majorants = std::vector<Float>();
+        ext_calls = std::vector<long>();
+        spp = std::vector<long>();
+    }
+
+    std::vector<std::string> estimators;
+    std::vector<Float> majorants;
+    std::vector<long> ext_calls;
+    std::vector<long> spp;
+
+    bool run_equal_extinctions;
+    bool run_equal_samples;
+    bool run_stratified_samples;
+
+    void initialize_fox_test();
+    void initialize_globe_test();
+    void initialize_pawn_test();
+    void initialize_smoke_test();
+    void initialize_teaser_test();
+    void initialize_vase_test();
+};
+
 class ExperimentBase
 {
 public:

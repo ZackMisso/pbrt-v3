@@ -1,6 +1,6 @@
 #include "vase.h"
 
-Vase_Scene::Vase_Scene(pbrt::Options options)
+Vase_Scene::Vase_Scene(pbrt::Options options, ExperimentFlags flags)
 {
     // int max_index = 60;
     // int start_index = 0;

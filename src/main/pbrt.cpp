@@ -37,6 +37,11 @@
 #include "parser.h"
 #include "parallel.h"
 #include "experiments/fox.h"
+#include "experiments/globe.h"
+#include "experiments/pawn.h"
+#include "experiments/smoke.h"
+#include "experiments/teaser.h"
+#include "experiments/vase.h"
 #include <glog/logging.h>
 
 using namespace pbrt;
@@ -135,6 +140,67 @@ int main(int argc, char *argv[]) {
                    !strcmp(argv[i], "-h")) {
             usage();
             return 0;
+        } else if (!strcmp(argv[i], "-fox")) {
+            ExperimentFlags experiment_flags = ExperimentFlags();
+            experiment_flags.initialize_fox_test();
+            experiment_flags.run_equal_extinctions = false;
+            experiment_flags.run_equal_samples = true;
+            experiment_flags.run_stratified_samples = true;
+            // hard code nThreads to be one
+            int prev_threads = options.nThreads;
+            options.nThreads = 1;
+            delete new Fox_Scene(options, experiment_flags);
+            options.nThreads = prev_threads;
+        } else if (!strcmp(argv[i], "-globe")) {
+            ExperimentFlags experiment_flags = ExperimentFlags();
+            experiment_flags.initialize_globe_test();
+            experiment_flags.run_equal_extinctions = true;
+            experiment_flags.run_equal_samples = true;
+            experiment_flags.run_stratified_samples = true;
+            int prev_threads = options.nThreads;
+            options.nThreads = 1;
+            delete new Globe_Scene(options, experiment_flags);
+            options.nThreads = prev_threads;
+        } else if (!strcmp(argv[i], "-pawn")) {
+            ExperimentFlags experiment_flags = ExperimentFlags();
+            experiment_flags.initialize_pawn_test();
+            experiment_flags.run_equal_extinctions = true;
+            experiment_flags.run_equal_samples = true;
+            experiment_flags.run_stratified_samples = true;
+            int prev_threads = options.nThreads;
+            options.nThreads = 1;
+            delete new Pawn_Scene(options, experiment_flags);
+            options.nThreads = prev_threads;
+        } else if (!strcmp(argv[i], "-smoke")) {
+            ExperimentFlags experiment_flags = ExperimentFlags();
+            experiment_flags.initialize_smoke_test();
+            experiment_flags.run_equal_extinctions = true;
+            experiment_flags.run_equal_samples = true;
+            experiment_flags.run_stratified_samples = true;
+            int prev_threads = options.nThreads;
+            options.nThreads = 1;
+            delete new Smoke_Scene(options, experiment_flags);
+            options.nThreads = prev_threads;
+        } else if (!strcmp(argv[i], "-teaser")) {
+            ExperimentFlags experiment_flags = ExperimentFlags();
+            experiment_flags.initialize_teaser_test();
+            experiment_flags.run_equal_extinctions = true;
+            experiment_flags.run_equal_samples = true;
+            experiment_flags.run_stratified_samples = true;
+            int prev_threads = options.nThreads;
+            options.nThreads = 1;
+            delete new Teaser(options, experiment_flags);
+            options.nThreads = prev_threads;
+        } else if (!strcmp(argv[i], "-vase")) {
+            ExperimentFlags experiment_flags = ExperimentFlags();
+            experiment_flags.initialize_teaser_test();
+            experiment_flags.run_equal_extinctions = true;
+            experiment_flags.run_equal_samples = true;
+            experiment_flags.run_stratified_samples = true;
+            int prev_threads = options.nThreads;
+            options.nThreads = 1;
+            delete new Vase_Scene(options, experiment_flags);
+            options.nThreads = prev_threads;
         } else
             filenames.push_back(argv[i]);
     }
@@ -159,18 +225,18 @@ int main(int argc, char *argv[]) {
         printf("See the file LICENSE.txt for the conditions of the license.\n");
         fflush(stdout);
     }
-    // pbrtInit(options);
+    pbrtInit(options);
 
-    new Fox_Scene(options);
-    // // Process scene description
-    // if (filenames.empty()) {
-    //     // Parse scene from standard input
-    //     pbrtParseFile("-");
-    // } else {
-    //     // Parse scene from input files
-    //     for (const std::string &f : filenames)
-    //         pbrtParseFile(f);
-    // }
-    // pbrtCleanup();
+
+    // Process scene description
+    if (filenames.empty()) {
+        // Parse scene from standard input
+        pbrtParseFile("-");
+    } else {
+        // Parse scene from input files
+        for (const std::string &f : filenames)
+            pbrtParseFile(f);
+    }
+    pbrtCleanup();
     return 0;
 }

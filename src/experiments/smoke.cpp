@@ -2,7 +2,7 @@
 
 #if OPENVDB
 
-Smoke_Scene::Smoke_Scene(pbrt::Options options)
+Smoke_Scene::Smoke_Scene(pbrt::Options options, ExperimentFlags flags)
 {
     // int start = 66;
     // int end = 67;

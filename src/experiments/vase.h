@@ -5,7 +5,7 @@
 class Vase_Scene : public ExperimentBase
 {
 public:
-    Vase_Scene(pbrt::Options options);
+    Vase_Scene(pbrt::Options options, ExperimentFlags flags);
 
     void runTest(pbrt::Options options, std::string transType, double angle, int index, bool isGT);
 
