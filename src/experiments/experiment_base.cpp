@@ -46,31 +46,31 @@ void ExperimentFlags::initialize_fox_test()
 void ExperimentFlags::initialize_globe_test()
 {
     majorants.clear();
-    majorants.push_back(0.1);
-    majorants.push_back(0.3);
-    majorants.push_back(0.6);
+    // majorants.push_back(0.1);
+    // majorants.push_back(0.3);
+    // majorants.push_back(0.6);
     majorants.push_back(1.0);
-    majorants.push_back(1.5);
-    majorants.push_back(2.5);
-    majorants.push_back(5.0);
+    // majorants.push_back(1.5);
+    // majorants.push_back(2.5);
+    // majorants.push_back(5.0);
 
     ext_calls.clear();
-    ext_calls.push_back(5965499 * 8);
-    ext_calls.push_back(8965499 * 8);
-    ext_calls.push_back(16055417 * 3);
+    // ext_calls.push_back(5965499 * 8);
+    // ext_calls.push_back(8965499 * 8);
+    // ext_calls.push_back(16055417 * 3);
     ext_calls.push_back(28745021 * 3);
-    ext_calls.push_back(44924520 * 2);
-    ext_calls.push_back(77719541 * 2);
-    ext_calls.push_back(160525061 * 2);
+    // ext_calls.push_back(44924520 * 2);
+    // ext_calls.push_back(77719541 * 2);
+    // ext_calls.push_back(160525061 * 2);
 
     spp.clear();
+    // spp.push_back(8);
+    // spp.push_back(8);
+    // spp.push_back(8);
     spp.push_back(8);
-    spp.push_back(8);
-    spp.push_back(8);
-    spp.push_back(8);
-    spp.push_back(8);
-    spp.push_back(8);
-    spp.push_back(8);
+    // spp.push_back(8);
+    // spp.push_back(8);
+    // spp.push_back(8);
 
     estimators.clear();
     estimators.push_back("track_length");
@@ -87,31 +87,31 @@ void ExperimentFlags::initialize_globe_test()
 void ExperimentFlags::initialize_pawn_test()
 {
     majorants.clear();
-    majorants.push_back(0.1);
-    majorants.push_back(0.3);
-    majorants.push_back(0.6);
+    // majorants.push_back(0.1);
+    // majorants.push_back(0.3);
+    // majorants.push_back(0.6);
     majorants.push_back(1.0);
-    majorants.push_back(1.5);
-    majorants.push_back(2.5);
-    majorants.push_back(5.0);
+    // majorants.push_back(1.5);
+    // majorants.push_back(2.5);
+    // majorants.push_back(5.0);
 
     ext_calls.clear();
-    ext_calls.push_back(1999450L * 8L);
-    ext_calls.push_back(2899450L * 8L);
-    ext_calls.push_back(4852991L * 8L);
+    // ext_calls.push_back(1999450L * 8L);
+    // ext_calls.push_back(2899450L * 8L);
+    // ext_calls.push_back(4852991L * 8L);
     ext_calls.push_back(9397973L * 6L);
-    ext_calls.push_back(15423376L * 6L);
-    ext_calls.push_back(27956510L * 6L);
-    ext_calls.push_back(60295235L * 6L);
+    // ext_calls.push_back(15423376L * 6L);
+    // ext_calls.push_back(27956510L * 6L);
+    // ext_calls.push_back(60295235L * 6L);
 
     spp.clear();
+    // spp.push_back(8);
+    // spp.push_back(8);
+    // spp.push_back(8);
     spp.push_back(8);
-    spp.push_back(8);
-    spp.push_back(8);
-    spp.push_back(8);
-    spp.push_back(8);
-    spp.push_back(8);
-    spp.push_back(8);
+    // spp.push_back(8);
+    // spp.push_back(8);
+    // spp.push_back(8);
 
     estimators.clear();
     estimators.push_back("track_length");
@@ -128,31 +128,31 @@ void ExperimentFlags::initialize_pawn_test()
 void ExperimentFlags::initialize_smoke_test()
 {
     majorants.clear();
-    majorants.push_back(0.1);
-    majorants.push_back(0.3);
-    majorants.push_back(0.6);
+    // majorants.push_back(0.1);
+    // majorants.push_back(0.3);
+    // majorants.push_back(0.6);
     majorants.push_back(1.0);
-    majorants.push_back(1.5);
-    majorants.push_back(2.5);
-    majorants.push_back(5.0);
+    // majorants.push_back(1.5);
+    // majorants.push_back(2.5);
+    // majorants.push_back(5.0);
 
     ext_calls.clear();
-    ext_calls.push_back(40000000 * 2);
-    ext_calls.push_back(40000000 * 2);
-    ext_calls.push_back(48166386 * 2);
+    // ext_calls.push_back(40000000 * 2);
+    // ext_calls.push_back(40000000 * 2);
+    // ext_calls.push_back(48166386 * 2);
     ext_calls.push_back(82572722 * 2);
-    ext_calls.push_back(125802342 * 2);
-    ext_calls.push_back(212562451 * 2);
-    ext_calls.push_back(430045736 * 2);
+    // ext_calls.push_back(125802342 * 2);
+    // ext_calls.push_back(212562451 * 2);
+    // ext_calls.push_back(430045736 * 2);
 
     spp.clear();
+    // spp.push_back(8);
+    // spp.push_back(8);
+    // spp.push_back(8);
     spp.push_back(8);
-    spp.push_back(8);
-    spp.push_back(8);
-    spp.push_back(8);
-    spp.push_back(8);
-    spp.push_back(8);
-    spp.push_back(8);
+    // spp.push_back(8);
+    // spp.push_back(8);
+    // spp.push_back(8);
 
     estimators.clear();
     estimators.push_back("track_length");
@@ -174,31 +174,31 @@ void ExperimentFlags::initialize_teaser_test()
 void ExperimentFlags::initialize_vase_test()
 {
     majorants.clear();
-    majorants.push_back(0.1);
-    majorants.push_back(0.3);
-    majorants.push_back(0.6);
+    // majorants.push_back(0.1);
+    // majorants.push_back(0.3);
+    // majorants.push_back(0.6);
     majorants.push_back(1.0);
-    majorants.push_back(1.5);
-    majorants.push_back(2.5);
-    majorants.push_back(5.0);
+    // majorants.push_back(1.5);
+    // majorants.push_back(2.5);
+    // majorants.push_back(5.0);
 
     ext_calls.clear();
-    ext_calls.push_back(20169511L * 4L);
-    ext_calls.push_back(20169511L * 4L);
-    ext_calls.push_back(25186442L * 4L);
+    // ext_calls.push_back(20169511L * 4L);
+    // ext_calls.push_back(20169511L * 4L);
+    // ext_calls.push_back(25186442L * 4L);
     ext_calls.push_back(45958204L * 4L);
-    ext_calls.push_back(72646939L * 4L);
-    ext_calls.push_back(126986658L * 4L);
-    ext_calls.push_back(264708923L * 4L);
+    // ext_calls.push_back(72646939L * 4L);
+    // ext_calls.push_back(126986658L * 4L);
+    // ext_calls.push_back(264708923L * 4L);
 
     spp.clear();
+    // spp.push_back(8);
+    // spp.push_back(8);
+    // spp.push_back(8);
     spp.push_back(8);
-    spp.push_back(8);
-    spp.push_back(8);
-    spp.push_back(8);
-    spp.push_back(8);
-    spp.push_back(8);
-    spp.push_back(8);
+    // spp.push_back(8);
+    // spp.push_back(8);
+    // spp.push_back(8);
 
     estimators.clear();
     estimators.push_back("track_length");
