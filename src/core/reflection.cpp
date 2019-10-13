@@ -872,4 +872,71 @@ std::string BSDF::ToString() const {
     return s + std::string(" ]");
 }
 
+Spectrum DiffuseReflective::Sample_f(const Vector3f &wo,
+                                     Vector3f *wi,
+                                     const Point2f &u,
+                                     Float *pdf,
+                                     BxDFType *sampledType) const
+{
+    Float F = FrDielectric(CosTheta(wo), 1.0, 2.0);
+
+    if (u[0] < F)
+    {
+        // Compute specular reflection
+        *wi = Vector3f(-wo.x, -wo.y, wo.z);
+        if (sampledType)
+            *sampledType = BxDFType(BSDF_SPECULAR | BSDF_REFLECTION);
+        *pdf = F;
+        return F * R / AbsCosTheta(*wi);// + F * Spectrum(0.6);
+    }
+    else
+    {
+        // Compute lambertian reflection
+        *wi = CosineSampleHemisphere(u);
+        if (sampledType)
+            *sampledType = BxDFType(BSDF_SPECULAR | BSDF_REFLECTION);
+        if (wo.z < 0) wi->z *= -1;
+        *pdf = Pdf(wo, *wi);
+        return D * InvPi * (1.0 - F);
+    }
+}
+
+// Samples reflective
+Spectrum DiffuseReflective::Sample_refl(const Vector3f& wo,
+                                         Vector3f* wi,
+                                         const Point2f& sample,
+                                         Float* contrib,
+                                         BxDFType* sampledType) const
+{
+    Float F = FrDielectric(CosTheta(wo), 1.0, 2.0);
+
+    *wi = Vector3f(-wo.x, -wo.y, wo.z);
+    if (sampledType)
+        *sampledType = BxDFType(BSDF_SPECULAR | BSDF_REFLECTION);
+    // *contrib = F;
+    return F * R / AbsCosTheta(*wi);//* sqrt(sample.x*sample.x+sample.y*sample.y);// + (1.0-F) * Spectrum(1.0);
+}
+
+// samples diffuse
+Spectrum DiffuseReflective::Sample_refr(const Vector3f& wo,
+                                         Vector3f* wi,
+                                         const Point2f& sample,
+                                         Float* contrib,
+                                         BxDFType* sampledType) const
+{
+    Float F = FrDielectric(CosTheta(wo), 1.0, 2.0);
+
+    *wi = CosineSampleHemisphere(sample);
+    if (sampledType)
+        *sampledType = BxDFType(BSDF_SPECULAR | BSDF_REFLECTION);
+    if (wo.z < 0) wi->z *= -1;
+    // *contrib = Pdf(wo, *wi);
+    return D * InvPi * (1.0 - F);
+}
+
+std::string DiffuseReflective::ToString() const
+{
+    return "Diffuse Reflective";
+}
+
 }  // namespace pbrt

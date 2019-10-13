@@ -10,8 +10,8 @@ public:
     void runTest(pbrt::Options options, std::string transType, Float majScale);
 
     void runEqualExtRenders(pbrt::Options, std::string transType, Float majScale, long extCalls);
-    void runEqualSampleRenders(pbrt::Options, std::string transType, Float majScale);
-    void runEqualSampleStratifiedRenders(pbrt::Options, std::string transType, Float majScale);
+    void runEqualSampleRenders(pbrt::Options, std::string transType, Float majScale, long samples);
+    void runEqualSampleStratifiedRenders(pbrt::Options, std::string transType, Float majScale, long samples);
 
     void initializePawn(std::string transType, Float majScale);
 };

@@ -23,153 +23,57 @@
 
 Pawn_Scene::Pawn_Scene(pbrt::Options options, ExperimentFlags flags)
 {
-    // std::vector<Float> majToTest = std::vector<Float>{
-    //     1.0, 1.1, 1.2, 1.3, 10.0,
-    //     2.0, 3.0, 5.0, 1.4, 1.5,
-    // };
+    std::string mk_loc = "mkdir pawn_figure";
+    std::system(mk_loc.c_str());
 
-    std::vector<Float> majToTest = std::vector<Float>();
-    // majToTest.push_back(0.1);
-    // // majToTest.push_back(0.2);
-    // majToTest.push_back(0.3);
-    // // majToTest.push_back(0.4);
-    //
-    // // majToTest.push_back(0.5);
-    // majToTest.push_back(0.6);
-    // // majToTest.push_back(0.7);
-    // // majToTest.push_back(0.8);
-    // // majToTest.push_back(0.9);
-    // //
-    // majToTest.push_back(1.0);
-    // majToTest.push_back(1.5);
-    // majToTest.push_back(2.0);
-    // // majToTest.push_back(2.5);
-    // // majToTest.push_back(3.5);
-    // //
-    // majToTest.push_back(5.0);
-    // // majToTest.push_back(7.5);
-    // majToTest.push_back(10.0);
-    // // majToTest.push_back(15.0);
-    // // majToTest.push_back(20.0);
+    if (flags.run_equal_extinctions)
+    {
+        // equal ext call renders
+        for (int j = 0; j < flags.ext_calls.size(); ++j)
+        {
+            for (int i = 0; i < flags.estimators.size(); ++i)
+            {
+                std::string mk_loc = "mkdir pawn_figure/" + std::to_string(flags.majorants[j]);
+                std::system(mk_loc.c_str());
 
-    // majToTest.push_back(0.1);
-    // majToTest.push_back(0.3);
-    // majToTest.push_back(0.6);
-    majToTest.push_back(1.0);
-    // majToTest.push_back(1.5);
-    // majToTest.push_back(2.5);
-    // majToTest.push_back(5.0);
+                runEqualExtRenders(options, flags.estimators[i], flags.majorants[j], flags.ext_calls[j]);
+            }
+        }
+    }
 
+    if (flags.run_equal_samples)
+    {
+        mk_loc = "mkdir pawn_figure_strat";
+        std::system(mk_loc.c_str());
 
-    std::vector<int> extCalls = std::vector<int>();
-    // extCalls.push_back(1999450L * 8L);
-    // // extCalls.push_back(2399450L * 8L);
-    // extCalls.push_back(2899450L * 8L);
-    // // extCalls.push_back(3399450L * 8L);
-    //
-    // // extCalls.push_back(3899450L * 8L);
-    // extCalls.push_back(4852991L * 8L);
-    // // extCalls.push_back(5948720L * 8L);
-    // // extCalls.push_back(7080102L * 8L);
-    // // extCalls.push_back(8228887L * 8L);
-    //
-    // extCalls.push_back(9397973L * 6L);
-    // extCalls.push_back(15423376L * 6L);
-    // extCalls.push_back(21637564L * 6L);
-    // // extCalls.push_back(27956510L * 6L);
-    // // extCalls.push_back(40789545L * 6L);
-    //
-    // extCalls.push_back(60295235L * 6L);
-    // // extCalls.push_back(93140421L * 6L);
-    // extCalls.push_back(126199406L * 6L);
-    // // extCalls.push_back(192630815L * 6L);
-    // // extCalls.push_back(259284596L * 6L);
+        for (int j = 0; j < flags.spp.size(); ++j)
+        {
+            for (int i = 0; i < flags.estimators.size(); ++i)
+            {
+                std::string mk_loc = "mkdir pawn_figure_strat/" + std::to_string(flags.majorants[j]) + "_rand";
+                std::system(mk_loc.c_str());
 
-    // extCalls.push_back(1999450L * 8L);
-    // extCalls.push_back(2899450L * 8L);
-    // extCalls.push_back(4852991L * 8L);
-    // extCalls.push_back(9397973L * 6L);
-    extCalls.push_back(15423376L * 6L);
-    // extCalls.push_back(27956510L * 6L);
-    // extCalls.push_back(60295235L * 6L);
+                runEqualSampleRenders(options, flags.estimators[i], flags.majorants[j], flags.ext_calls[j]);
+            }
+        }
+    }
 
-    std::vector<std::string> estimators = std::vector<std::string>();
-    estimators.push_back("track_length");
-    estimators.push_back("ratio");
-    estimators.push_back("next_flight_ratio");
-    estimators.push_back("unidirectional");
-    estimators.push_back("pseries_cumulative");
-    estimators.push_back("pseries_cdf");
-    // estimators.push_back("pseries_rr");
-    estimators.push_back("pseries_ratio");
-    estimators.push_back("pseries_next_flight_ratio");
-    // estimators.push_back("pseries_interp");
-    estimators.push_back("bidirectional");
+    if (flags.run_stratified_samples)
+    {
+        mk_loc = "mkdir globe_figure_strat";
+        std::system(mk_loc.c_str());
 
-    // for (double val = 1.0; val > 0.03; val -= 0.05)
-    // {
-    //     majToTest.push_back(1.0 / val);
-    // }
+        for (int j = 0; j < flags.spp.size(); ++j)
+        {
+            for (int i = 0; i < flags.estimators.size(); ++i)
+            {
+                std::string mk_loc = "mkdir pawn_figure_strat/" + std::to_string(flags.majorants[j]) + "_strat";
+                std::system(mk_loc.c_str());
 
-    // for (int i = 0; i < majToTest.size(); ++i)
-    // {
-    //     // std::string rm_loc = "rm -rf /Users/corneria/Documents/Research/pbrttest/build_final/pawn_figure/" + std::to_string(majToTest[i]);
-    //     std::string mk_loc = "mkdir /Users/corneria/Documents/Research/pbrttest/build_final/pawn_figure/" + std::to_string(majToTest[i]);
-    //
-    //     // std::system(rm_loc.c_str());
-    //     std::system(mk_loc.c_str());
-    //
-    //     for (int j = 0; j < estimators.size(); ++j)
-    //     {
-    //         runEqualExtRenders(options, estimators[j], majToTest[i], extCalls[i]);
-    //     }
-    // }
-
-    // for (int i = 0; i < majToTest.size(); ++i)
-    // {
-    //     // std::string rm_loc_rand = "rm -rf /Users/corneria/Documents/Research/pbrttest/build_final/pawn_figure_rand/" + std::to_string(majToTest[i]);
-    //     std::string mk_loc_rand = "mkdir /Users/corneria/Documents/Research/pbrttest/build_final/pawn_figure_strat/" + std::to_string(majToTest[i]) + "_rand";
-    //
-    //     // std::system(rm_loc_rand.c_str());
-    //     std::system(mk_loc_rand.c_str());
-    //
-    //     for (int j = 0; j < estimators.size(); ++j)
-    //     {
-    //         runEqualSampleRenders(options, estimators[j], majToTest[i]);
-    //     }
-    // }
-    //
-    // for (int i = 0; i < majToTest.size(); ++i)
-    // {
-    //     // std::string rm_loc_strat = "rm -rf /Users/corneria/Documents/Research/pbrttest/build_final/pawn_figure_strat/" + std::to_string(majToTest[i]);
-    //     std::string mk_loc_strat = "mkdir /Users/corneria/Documents/Research/pbrttest/build_final/pawn_figure_strat/" + std::to_string(majToTest[i]) + "_strat";
-    //
-    //     // std::system(rm_loc_strat.c_str());
-    //     std::system(mk_loc_strat.c_str());
-    //
-    //     for (int j = 0; j < estimators.size(); ++j)
-    //     {
-    //         runEqualSampleStratifiedRenders(options, estimators[j], majToTest[i]);
-    //     }
-    // }
-
-    // for (int i = 0; i < majToTest.size(); ++i)
-    // {
-    //     std::cout << "Tested for: " << 1.0 / majToTest[i] << std::endl;
-    // }
-
-    // runEqualExtRenders("bidirectional_mis", 20.0);
-    // runTest("track_length", 2.0);
-    // runTest(options, "ratio", 2.0);
-    // runTest("nf_ratio", 2.0);
-    // runTest("pseries_ratio", 2.0);
-    runTest(options, "next_flight_ratio", 1.0);
-    // runTest("pseries_cumulative", 2.0);
-    // runTest("pseries_cdf", 2.0);
-    // runTest("unidirectional_mis", 2.0);
-    // runTest("bidirectional_mis", 2.0);
-    // runTest("pseries_nf_ratio", 2.0);
-    // runTest("pseries_interp", 2.0);
+                runEqualSampleStratifiedRenders(options, flags.estimators[i], flags.majorants[j], flags.ext_calls[j]);
+            }
+        }
+    }
 }
 
 void Pawn_Scene::runTest(pbrt::Options options, std::string transType, Float majScale)
@@ -251,8 +155,8 @@ void Pawn_Scene::runEqualExtRenders(pbrt::Options options, std::string transType
 {
     pbrtInit(options);
 
-    SetSearchDirectory(DirectoryContaining("/Users/corneria/Documents/Research/testscenes/chess/dragon_10.pbrt"));
-    exp_path = "/Users/corneria/Documents/Research/testscenes/chess/";
+    SetSearchDirectory(DirectoryContaining(TEST_SCENES_PATH "/chess/dragon_10.pbrt"));
+    exp_path = TEST_SCENES_PATH "/chess/";
 
     initializeIntegrator(200000000,
                          //240,
@@ -309,12 +213,12 @@ void Pawn_Scene::runEqualExtRenders(pbrt::Options options, std::string transType
     pbrtCleanup();
 }
 
-void Pawn_Scene::runEqualSampleRenders(pbrt::Options options, std::string transType, Float majScale)
+void Pawn_Scene::runEqualSampleRenders(pbrt::Options options, std::string transType, Float majScale, long samples)
 {
     pbrtInit(options);
 
-    SetSearchDirectory(DirectoryContaining("/Users/corneria/Documents/Research/testscenes/chess/dragon_10.pbrt"));
-    exp_path = "/Users/corneria/Documents/Research/testscenes/chess/";
+    SetSearchDirectory(DirectoryContaining(TEST_SCENES_PATH "/chess/dragon_10.pbrt"));
+    exp_path = TEST_SCENES_PATH "/chess/";
 
     initializeIntegrator(200000000,
                          //240,
@@ -328,7 +232,7 @@ void Pawn_Scene::runEqualSampleRenders(pbrt::Options options, std::string transT
                          false);
 
     // initializeSampler("random", 4);
-    initializeSampler("random", 8);
+    initializeSampler("random", samples);
     // initializeSampler("random", 64);
 
     initializePixelFilter("box");
@@ -373,12 +277,12 @@ void Pawn_Scene::runEqualSampleRenders(pbrt::Options options, std::string transT
     pbrtCleanup();
 }
 
-void Pawn_Scene::runEqualSampleStratifiedRenders(pbrt::Options options, std::string transType, Float majScale)
+void Pawn_Scene::runEqualSampleStratifiedRenders(pbrt::Options options, std::string transType, Float majScale, long samples)
 {
     pbrtInit(options);
 
-    SetSearchDirectory(DirectoryContaining("/Users/corneria/Documents/Research/testscenes/chess/dragon_10.pbrt"));
-    exp_path = "/Users/corneria/Documents/Research/testscenes/chess/";
+    SetSearchDirectory(DirectoryContaining(TEST_SCENES_PATH "/chess/dragon_10.pbrt"));
+    exp_path = TEST_SCENES_PATH "/chess/";
 
     initializeIntegrator(200000000,
                          //240,
@@ -391,7 +295,7 @@ void Pawn_Scene::runEqualSampleStratifiedRenders(pbrt::Options options, std::str
                          false,
                          false);
 
-    initializeSampler("random", 8);
+    initializeSampler("random", samples);
 
     initializePixelFilter("box");
 

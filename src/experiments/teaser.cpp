@@ -2,19 +2,21 @@
 
 Teaser::Teaser(pbrt::Options options, ExperimentFlags flags)
 {
-    // runTest(options, "ratio", true);
-    runTest(options, "ratio", false);
-    runTest(options, "next_flight_ratio", false);
-    runTest(options, "pseries_cumulative", false);
-    runTest(options, "pseries_cdf", false);
+    std::string mk_loc = "mkdir teaser";
+    std::system(mk_loc.c_str());
+
+    for (int i = 0; i < flags.estimators.size(); ++i)
+    {
+        runTest(options, flags.estimators[i], false);
+    }
 }
 
 void Teaser::runTest(pbrt::Options options, std::string transType, bool is_gt)
 {
     pbrtInit(options);
 
-    SetSearchDirectory(DirectoryContaining("/Users/corneria/Documents/Research/testscenes/chess/dragon_10.pbrt"));
-    exp_path = "/Users/corneria/Documents/Research/testscenes/chess/";
+    SetSearchDirectory(DirectoryContaining(TEST_SCENES_PATH "/chess/dragon_10.pbrt"));
+    exp_path = TEST_SCENES_PATH "/chess/";
 
     initializeIntegrator(200000000,
                          3400000000,
@@ -97,7 +99,7 @@ void Teaser::initializeWorld(std::string transType, Float majScale)
     Float min_z = -1.0;
     Float max_z = 0.0;
 
-    std::string base_path = "/Users/corneria/Documents/Research/testscenes/chess/textures/generated_2/";
+    std::string base_path = TEST_SCENES_PATH "/chess/textures/generated_2/";
 
     for (int i = 0; i < 12; ++i)
     {
@@ -210,7 +212,7 @@ void Teaser::initializePawn_One(std::string transType, Float majScale)
     double startY = 0.0;
     double sizeX = 15.0;
     double sizeY = 15.0;
-    std::string base_path = "/Users/corneria/Documents/Research/testscenes/chess/textures/generated_2/";
+    std::string base_path = TEST_SCENES_PATH "/chess/textures/generated_2/";
 
     // initializeDeintegratedTextureMedium("density",
     //                                     base_path + "mesh_1.hdr",
@@ -267,7 +269,7 @@ void Teaser::initializePawn_One(std::string transType, Float majScale)
 
 void Teaser::initializePawn_Two(std::string transType, Float majScale)
 {
-    std::string base_path = "/Users/corneria/Documents/Research/testscenes/chess/textures/generated_2/";
+    std::string base_path = TEST_SCENES_PATH "/chess/textures/generated_2/";
 
     Float i = 3.0;
     Float j = 6.0;
@@ -338,7 +340,7 @@ void Teaser::initializePawn_Two(std::string transType, Float majScale)
 
 void Teaser::initializePawn_Four(std::string transType, Float majScale)
 {
-    std::string base_path = "/Users/corneria/Documents/Research/testscenes/chess/textures/generated_2/";
+    std::string base_path = TEST_SCENES_PATH "/chess/textures/generated_2/";
 
     Float i = 4.0;
     Float j = 2.0;
@@ -406,7 +408,7 @@ void Teaser::initializePawn_Four(std::string transType, Float majScale)
 
 void Teaser::initializePawn_Five(std::string transType, Float majScale)
 {
-    std::string base_path = "/Users/corneria/Documents/Research/testscenes/chess/textures/generated_2/";
+    std::string base_path = TEST_SCENES_PATH "/chess/textures/generated_2/";
 
     Float i = 6.0;
     Float j = 3.0;
@@ -474,7 +476,7 @@ void Teaser::initializePawn_Five(std::string transType, Float majScale)
 
 void Teaser::initializeKnight_Two(std::string transType, Float majScale)
 {
-    std::string base_path = "/Users/corneria/Documents/Research/testscenes/chess/textures/generated_2/";
+    std::string base_path = TEST_SCENES_PATH "/chess/textures/generated_2/";
 
     Float i = 1.0;
     Float j = 5.0;
@@ -543,7 +545,7 @@ void Teaser::initializeKnight_Two(std::string transType, Float majScale)
 
 void Teaser::initializeBishop_One(std::string transType, Float majScale)
 {
-    std::string base_path = "/Users/corneria/Documents/Research/testscenes/chess/textures/generated_2/";
+    std::string base_path = TEST_SCENES_PATH "/chess/textures/generated_2/";
 
     Float i = 4.0;
     Float j = 3.0;
@@ -612,7 +614,7 @@ void Teaser::initializeBishop_One(std::string transType, Float majScale)
 
 void Teaser::initializeBishop_Two(std::string transType, Float majScale)
 {
-    std::string base_path = "/Users/corneria/Documents/Research/testscenes/chess/textures/generated_2/";
+    std::string base_path = TEST_SCENES_PATH "/chess/textures/generated_2/";
 
     Float i = 5.0;
     Float j = 1.0;
@@ -682,7 +684,7 @@ void Teaser::initializeBishop_Two(std::string transType, Float majScale)
 
 void Teaser::initializeKing(std::string transType, Float majScale)
 {
-    std::string base_path = "/Users/corneria/Documents/Research/testscenes/chess/textures/generated_2/";
+    std::string base_path = TEST_SCENES_PATH "/chess/textures/generated_2/";
 
     // Float i = 2.0;
     // Float j = 2.0;
@@ -763,7 +765,7 @@ void Teaser::initializeKing(std::string transType, Float majScale)
 
 void Teaser::initializeQueen(std::string transType, Float majScale)
 {
-    std::string base_path = "/Users/corneria/Documents/Research/testscenes/chess/textures/generated_2/";
+    std::string base_path = TEST_SCENES_PATH "/chess/textures/generated_2/";
 
     // Float i = 2.0;
     // Float j = 3.0;

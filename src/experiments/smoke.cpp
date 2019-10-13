@@ -4,187 +4,57 @@
 
 Smoke_Scene::Smoke_Scene(pbrt::Options options, ExperimentFlags flags)
 {
-    // int start = 66;
-    // int end = 67;
-    //
-    // for (int i = start; i < end; ++i)
-    //     runTest("ratio", true, "simple_smoke_" + std::to_string(i) + ".vdb");
+    std::string mk_loc = "mkdir vdb_figure";
+    std::system(mk_loc.c_str());
 
-    // runTest("ratio", true, "simple_smoke_66.vdb", 0);
-
-    // for (int i = 2; i < 240; ++i)
-    //     runTest("ratio", false, "swirly_smoke_" + std::to_string(i) + ".vdb", i);
-
-    std::vector<Float> majorants = std::vector<Float>();
-    // majorants.push_back(0.1);
-    // // majorants.push_back(0.2);
-    // majorants.push_back(0.3);
-    // // majorants.push_back(0.4);
-    // // majorants.push_back(0.5);
-    // majorants.push_back(0.6);
-    // // majorants.push_back(0.7);
-    // // majorants.push_back(0.8);
-    // // majorants.push_back(0.9);
-    // majorants.push_back(1.0);
-    // majorants.push_back(1.5);
-    // majorants.push_back(2.0);
-    // // majorants.push_back(2.5);
-    // // majorants.push_back(3.5);
-    // majorants.push_back(5.0);
-    // // majorants.push_back(7.5);
-    // majorants.push_back(10.0);
-    // // majorants.push_back(15.0);
-    // // majorants.push_back(20.0);
-
-    majorants.push_back(0.1);
-    majorants.push_back(0.3);
-    majorants.push_back(0.6);
-    majorants.push_back(1.0);
-    majorants.push_back(1.5);
-    majorants.push_back(2.5);
-    majorants.push_back(5.0);
-
-    std::vector<Float> const_extCalls = std::vector<Float>();
-    // const_extCalls.push_back(40000000 * 2);
-    // // const_extCalls.push_back(40000000 * 2);
-    // const_extCalls.push_back(40000000 * 2);
-    // // const_extCalls.push_back(40000000 * 2);
-    // // const_extCalls.push_back(40000000 * 2);
-    // const_extCalls.push_back(48166386 * 2);
-    // // const_extCalls.push_back(56744152 * 2);
-    // // const_extCalls.push_back(65349042 * 2);
-    // // const_extCalls.push_back(73944685 * 2);
-    // const_extCalls.push_back(82572722 * 2);
-    // const_extCalls.push_back(125802342 * 2);
-    // const_extCalls.push_back(169161497 * 2);
-    // // const_extCalls.push_back(212562451 * 2);
-    // // const_extCalls.push_back(299497124 * 2);
-    // const_extCalls.push_back(430045736 * 2);
-    // // const_extCalls.push_back(647817883 * 2);
-    // const_extCalls.push_back(865709986 * 2);
-    // // const_extCalls.push_back(1301676808 * 2);
-    // // const_extCalls.push_back(1737764972 * 2);
-
-    const_extCalls.push_back(40000000 * 2);
-    const_extCalls.push_back(40000000 * 2);
-    const_extCalls.push_back(48166386 * 2);
-    const_extCalls.push_back(82572722 * 2);
-    const_extCalls.push_back(125802342 * 2);
-    const_extCalls.push_back(212562451 * 2);
-    const_extCalls.push_back(430045736 * 2);
-
-    std::vector<Float> macro_extCalls = std::vector<Float>();
-    // macro_extCalls.push_back(45388457 * 2);
-    // macro_extCalls.push_back(56976634 * 2);
-    // macro_extCalls.push_back(68558811 * 2);
-    // macro_extCalls.push_back(138051169 * 2);
-    // macro_extCalls.push_back(253859384 * 2);
-
-    std::vector<Float> equalSamples = std::vector<Float>();
-    equalSamples.push_back(8);
-    equalSamples.push_back(8);
-    equalSamples.push_back(8);
-    equalSamples.push_back(8);
-    equalSamples.push_back(8);
-    //
-    equalSamples.push_back(8);
-    equalSamples.push_back(8);
-    // equalSamples.push_back(8);
-    // equalSamples.push_back(8);
-    // equalSamples.push_back(8);
-    // //
-    // equalSamples.push_back(8);
-    // equalSamples.push_back(8);
-    // equalSamples.push_back(8);
-    // equalSamples.push_back(8);
-    // equalSamples.push_back(8);
-    // equalSamples.push_back(8);
-    // equalSamples.push_back(8);
-
-    std::vector<std::string> estimators = std::vector<std::string>();
-    // estimators.push_back("track_length");
-    // estimators.push_back("ratio");
-    // estimators.push_back("next_flight_ratio");
-    // estimators.push_back("unidirectional");
-    // estimators.push_back("pseries_cumulative");
-    estimators.push_back("pseries_cdf");
-    // estimators.push_back("pseries_rr");
-    // estimators.push_back("pseries_ratio");
-    // estimators.push_back("pseries_next_flight_ratio");
-    // estimators.push_back("pseries_interp");
-    // estimators.push_back("bidirectional");
-
-    // equal ext call renders
-    for (int j = 0; j < const_extCalls.size(); ++j)
+    if (flags.run_equal_extinctions)
     {
-        for (int i = 0; i < estimators.size(); ++i)
+        // equal ext call renders
+        for (int j = 0; j < flags.ext_calls.size(); ++j)
         {
-            std::string mk_loc = "mkdir /Users/corneria/Documents/Research/pbrttest/build_final/vdb_figure/" + std::to_string(majorants[j]);
-            std::system(mk_loc.c_str());
+            for (int i = 0; i < flags.estimators.size(); ++i)
+            {
+                std::string mk_loc = "mkdir vdb_figure/" + std::to_string(flags.majorants[j]);
+                std::system(mk_loc.c_str());
 
-            runEqualExtRenders(options, estimators[i], majorants[j], const_extCalls[j]);
+                runEqualExtRenders(options, flags.estimators[i], flags.majorants[j], flags.ext_calls[j]);
+            }
         }
     }
 
-    // // equal random pixel samples
-    for (int j = 0; j < equalSamples.size(); ++j)
+    if (flags.run_equal_samples)
     {
-        for (int i = 0; i < estimators.size(); ++i)
-        {
-            std::string mk_loc = "mkdir /Users/corneria/Documents/Research/pbrttest/build_final/vdb_figure_strat/" + std::to_string(majorants[j]) + "_rand";
-            std::system(mk_loc.c_str());
+        mk_loc = "mkdir vdb_figure_strat";
+        std::system(mk_loc.c_str());
 
-            runEqualSampleRenders(options, estimators[i], majorants[j], equalSamples[j]);
+        for (int j = 0; j < flags.spp.size(); ++j)
+        {
+            for (int i = 0; i < flags.estimators.size(); ++i)
+            {
+                std::string mk_loc = "mkdir vdb_figure_strat/" + std::to_string(flags.majorants[j]) + "_rand";
+                std::system(mk_loc.c_str());
+
+                runEqualSampleRenders(options, flags.estimators[i], flags.majorants[j], 8);
+            }
         }
     }
 
-    // equal stratified pixel samples
-    for (int j = 0; j < equalSamples.size(); ++j)
+    if (flags.run_stratified_samples)
     {
-        for (int i = 0; i < estimators.size(); ++i)
-        {
-            std::string mk_loc = "mkdir /Users/corneria/Documents/Research/pbrttest/build_final/vdb_figure_strat/" + std::to_string(majorants[j]) + "_strat";
-            std::system(mk_loc.c_str());
+        mk_loc = "mkdir vdb_figure_strat";
+        std::system(mk_loc.c_str());
 
-            runEqualSampleStratifiedRenders(options, estimators[i], majorants[j], equalSamples[j]);
+        for (int j = 0; j < flags.spp.size(); ++j)
+        {
+            for (int i = 0; i < flags.estimators.size(); ++i)
+            {
+                std::string mk_loc = "mkdir vdb_figure_strat/" + std::to_string(flags.majorants[j]) + "_strat";
+                std::system(mk_loc.c_str());
+
+                runEqualSampleStratifiedRenders(options, flags.estimators[i], flags.majorants[j], 8);
+            }
         }
     }
-
-    // macrogrid - equal ext call renders
-    // for (int i = 0; i < estimators.size(); ++i)
-    // {
-    //     for (int j = 0; j < macro_extCalls.size(); ++j)
-    //     {
-    //         std::string mk_loc = "mkdir /Users/corneria/Documents/Research/pbrttest/build_final/vdb_macro_figure/" + std::to_string(majorants[j]);
-    //         std::system(mk_loc.c_str());
-    //
-    //         runEqualExtRenders_Macrogrid(estimators[i], majorants[j], macro_extCalls[j]);
-    //     }
-    // }
-
-    // macrogrid - equal random pixel samples
-    // for (int i = 0; i < estimators.size(); ++i)
-    // {
-    //     for (int j = 0; j < equalSamples.size(); ++j)
-    //     {
-    //         std::string mk_loc = "mkdir /Users/corneria/Documents/Research/pbrttest/build_final/vdb_macro_figure_rand/" + std::to_string(majorants[j]);
-    //         std::system(mk_loc.c_str());
-    //
-    //         runEqualSampleRenders_Macrogrid(estimators[i], majorants[j], equalSamples[j]);
-    //     }
-    // }
-
-    // macrogrid - equal stratified pixel samples
-    // for (int i = 0; i < estimators.size(); ++i)
-    // {
-    //     for (int j = 0; j < equalSamples.size(); ++j)
-    //     {
-    //         std::string mk_loc = "mkdir /Users/corneria/Documents/Research/pbrttest/build_final/vdb_macro_figure_strat/" + std::to_string(majorants[j]);
-    //         std::system(mk_loc.c_str());
-    //
-    //         runEqualSampleStratifiedRenders_Macrogrid(estimators[i], majorants[j], equalSamples[j]);
-    //     }
-    // }
 }
 
 void Smoke_Scene::initializeSceneMediumBox(std::string transType,
@@ -232,8 +102,8 @@ void Smoke_Scene::initializeSceneMediumBox(std::string transType,
 
 void Smoke_Scene::runTest(std::string transType, bool isGT, std::string name, int iter)
 {
-    SetSearchDirectory(DirectoryContaining("/Users/corneria/Documents/Research/testscenes/vdb_smoke/dragon_10.pbrt"));
-    exp_path = "/Users/corneria/Documents/Research/testscenes/vdb_smoke/";
+    SetSearchDirectory(DirectoryContaining(TEST_SCENES_PATH "/vdb_smoke/dragon_10.pbrt"));
+    exp_path = TEST_SCENES_PATH "/vdb_smoke/";
 
     initializeIntegrator(200000000,
                          // 100000000,
@@ -305,8 +175,8 @@ void Smoke_Scene::runEqualExtRenders(pbrt::Options options,
 {
     pbrtInit(options);
 
-    SetSearchDirectory(DirectoryContaining("/Users/corneria/Documents/Research/testscenes/vdb_smoke/dragon_10.pbrt"));
-    exp_path = "/Users/corneria/Documents/Research/testscenes/vdb_smoke/";
+    SetSearchDirectory(DirectoryContaining(TEST_SCENES_PATH "/vdb_smoke/dragon_10.pbrt"));
+    exp_path = TEST_SCENES_PATH "/vdb_smoke/";
 
     initializeIntegrator(200000000,
                          samples,
@@ -366,8 +236,8 @@ void Smoke_Scene::runEqualSampleRenders(pbrt::Options options,
 {
     pbrtInit(options);
 
-    SetSearchDirectory(DirectoryContaining("/Users/corneria/Documents/Research/testscenes/vdb_smoke/dragon_10.pbrt"));
-    exp_path = "/Users/corneria/Documents/Research/testscenes/vdb_smoke/";
+    SetSearchDirectory(DirectoryContaining(TEST_SCENES_PATH "/vdb_smoke/dragon_10.pbrt"));
+    exp_path = TEST_SCENES_PATH "/vdb_smoke/";
 
     initializeIntegrator(200000000,
                          //400000000,
@@ -424,8 +294,8 @@ void Smoke_Scene::runEqualExtRenders_Macrogrid(std::string transType,
                                                    Float majorant,
                                                    int samples)
 {
-    SetSearchDirectory(DirectoryContaining("/Users/corneria/Documents/Research/testscenes/vdb_smoke/dragon_10.pbrt"));
-    exp_path = "/Users/corneria/Documents/Research/testscenes/vdb_smoke/";
+    SetSearchDirectory(DirectoryContaining(TEST_SCENES_PATH "/vdb_smoke/dragon_10.pbrt"));
+    exp_path = TEST_SCENES_PATH "/vdb_smoke/";
 
     initializeIntegrator(200000000,
                          samples,
@@ -480,8 +350,8 @@ void Smoke_Scene::runEqualSampleRenders_Macrogrid(std::string transType,
                                                       Float majorant,
                                                       int samples)
 {
-    SetSearchDirectory(DirectoryContaining("/Users/corneria/Documents/Research/testscenes/vdb_smoke/dragon_10.pbrt"));
-    exp_path = "/Users/corneria/Documents/Research/testscenes/vdb_smoke/";
+    SetSearchDirectory(DirectoryContaining(TEST_SCENES_PATH "/vdb_smoke/dragon_10.pbrt"));
+    exp_path = TEST_SCENES_PATH "/vdb_smoke/";
 
     initializeIntegrator(200000000,
                          //400000000,
@@ -536,8 +406,8 @@ void Smoke_Scene::runEqualSampleStratifiedRenders_Macrogrid(std::string transTyp
                                                                 Float majorant,
                                                                 int samples)
 {
-    SetSearchDirectory(DirectoryContaining("/Users/corneria/Documents/Research/testscenes/vdb_smoke/dragon_10.pbrt"));
-    exp_path = "/Users/corneria/Documents/Research/testscenes/vdb_smoke/";
+    SetSearchDirectory(DirectoryContaining(TEST_SCENES_PATH "/vdb_smoke/dragon_10.pbrt"));
+    exp_path = TEST_SCENES_PATH "/vdb_smoke/";
 
     initializeIntegrator(200000000,
                          //400000000,
@@ -595,8 +465,8 @@ void Smoke_Scene::runEqualSampleStratifiedRenders(pbrt::Options options,
 {
     pbrtInit(options);
 
-    SetSearchDirectory(DirectoryContaining("/Users/corneria/Documents/Research/testscenes/vdb_smoke/dragon_10.pbrt"));
-    exp_path = "/Users/corneria/Documents/Research/testscenes/vdb_smoke/";
+    SetSearchDirectory(DirectoryContaining(TEST_SCENES_PATH "/vdb_smoke/dragon_10.pbrt"));
+    exp_path = TEST_SCENES_PATH "/vdb_smoke/";
 
     initializeIntegrator(200000000,
                          //400000000,

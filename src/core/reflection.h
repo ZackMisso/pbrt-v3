@@ -382,6 +382,51 @@ class SpecularTransmission : public BxDF {
     const TransportMode mode;
 };
 
+class DiffuseReflective : public BxDF
+{
+public:
+    DiffuseReflective(const Spectrum& D,
+                      const Spectrum& R,
+                      TransportMode mode)
+        : BxDF(BxDFType(BSDF_REFLECTION | BSDF_SPECULAR)),
+          D(D),
+          R(R),
+          mode(mode) { }
+
+    Spectrum f(const Vector3f& wo, const Vector3f& wi) const
+    {
+        Float F = FrDielectric(CosTheta(wo), 1.0, 1.0);
+
+        return D * InvPi * (1.0 - F);
+    }
+
+    Spectrum Sample_f(const Vector3f &wo,
+                      Vector3f *wi,
+                      const Point2f &u,
+                      Float *pdf,
+                      BxDFType *sampledType) const;
+
+    Spectrum Sample_refl(const Vector3f& wo,
+                         Vector3f* wi,
+                         const Point2f& sample,
+                         Float* contrib,
+                         BxDFType* sampledType = nullptr) const;
+
+    Spectrum Sample_refr(const Vector3f& wo,
+                         Vector3f* wi,
+                         const Point2f& sample,
+                         Float* contrib,
+                         BxDFType* sampledType = nullptr) const;
+
+    Float Pdf(const Vector3f &wo, const Vector3f &wi) const { return SameHemisphere(wo, wi) ? AbsCosTheta(wi) * InvPi : 0; }
+    std::string ToString() const;
+
+private:
+    // FresnelSpecular Private Data
+    const Spectrum D, R;
+    const TransportMode mode;
+};
+
 class FresnelSpecular : public BxDF {
   public:
     // FresnelSpecular Public Methods

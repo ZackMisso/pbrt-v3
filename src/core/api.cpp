@@ -78,6 +78,7 @@
 #include "materials/mirror.h"
 #include "materials/mixmat.h"
 #include "materials/plastic.h"
+#include "materials/refl_matte.h"
 #include "materials/substrate.h"
 #include "materials/subsurface.h"
 #include "materials/translucent.h"
@@ -127,6 +128,7 @@
 #endif
 
 #include "procedural_media/voronoi_spiral_media.h"
+#include "procedural_media/deintegrated_texture.h"
 #include "procedural_media/chess_media.h"
 
 #include <map>
@@ -561,6 +563,8 @@ std::shared_ptr<Material> MakeMaterial(const std::string &name,
         material = CreateMatteMaterial(mp);
     else if (name == "plastic")
         material = CreatePlasticMaterial(mp);
+    else if (name == "refl_matte")
+        material = CreateReflectiveMatteMaterial(mp);
     else if (name == "translucent")
         material = CreateTranslucentMaterial(mp);
     else if (name == "glass")
@@ -685,6 +689,8 @@ std::shared_ptr<Texture<Spectrum>> MakeSpectrumTexture(
         tex = CreateFBmSpectrumTexture(tex2world, tp);
     else if (name == "wrinkled")
         tex = CreateWrinkledSpectrumTexture(tex2world, tp);
+    else if (name == "deintegrated_texture")
+        tex = CreateDeintegratedTextureMedia(tp);
     else if (name == "marble")
         tex = CreateMarbleSpectrumTexture(tex2world, tp);
     else if (name == "windy")

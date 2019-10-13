@@ -34,7 +34,7 @@ Globe_Scene::Globe_Scene(pbrt::Options options, ExperimentFlags flags)
                 std::string mk_loc = "mkdir globe_figure_strat/" + std::to_string(flags.majorants[j]) + "_rand";
                 std::system(mk_loc.c_str());
 
-                runEqualSampleRenders(options, flags.estimators[i], flags.majorants[j], flags.ext_calls[j]);
+                runEqualSampleRenders(options, flags.estimators[i], flags.majorants[j], 8);
             }
         }
     }
@@ -51,7 +51,7 @@ Globe_Scene::Globe_Scene(pbrt::Options options, ExperimentFlags flags)
                 std::string mk_loc = "mkdir globe_figure_strat/" + std::to_string(flags.majorants[j]) + "_strat";
                 std::system(mk_loc.c_str());
 
-                runEqualSampleStratifiedRenders(options, flags.estimators[i], flags.majorants[j], flags.ext_calls[j]);
+                runEqualSampleStratifiedRenders(options, flags.estimators[i], flags.majorants[j], 8);
             }
         }
     }

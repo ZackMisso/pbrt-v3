@@ -168,7 +168,16 @@ void ExperimentFlags::initialize_smoke_test()
 
 void ExperimentFlags::initialize_teaser_test()
 {
-    // TODO
+    estimators.clear();
+    // estimators.push_back("track_length");
+    // estimators.push_back("ratio");
+    // estimators.push_back("next_flight_ratio");
+    // estimators.push_back("unidirectional");
+    // estimators.push_back("pseries_cumulative");
+    // estimators.push_back("pseries_cmf");
+    // estimators.push_back("pseries_ratio");
+    // estimators.push_back("pseries_next_flight_ratio");
+    estimators.push_back("bidirectional");
 }
 
 void ExperimentFlags::initialize_vase_test()
@@ -972,10 +981,8 @@ void ExperimentBase::initializeProceduralMedium(std::string name,
     ParamSet mediumSet;
     mediumSet.AddString("type", std::move(type), 1);
     // mediumSet.AddTexture("procedural", texName);
-    std::cout << "JERE" << std::endl;
     mediumSet.AddTexture("procedural", texName);
     mediumSet.AddString("transEstFunc", std::move(transEstFunc), 1);
-    std::cout << "HERE" << std::endl;
     mediumSet.AddString("majFunc", std::move(majFunc), 1);
     mediumSet.AddString("minFunc", std::move(minFunc), 1);
     mediumSet.AddString("sampFunc", std::move(sampFunc), 1);

@@ -44,6 +44,12 @@
 #include "experiments/vase.h"
 #include <glog/logging.h>
 
+#if OPENVDB
+    #include <openvdb/openvdb.h>
+    #include <openvdb/tools/ChangeBackground.h>
+    #include "media/density/vdb_density.h"
+#endif
+
 using namespace pbrt;
 
 static void usage(const char *msg = nullptr) {
@@ -151,7 +157,9 @@ int main(int argc, char *argv[]) {
             options.nThreads = 1;
             delete new Fox_Scene(options, experiment_flags);
             options.nThreads = prev_threads;
+            return 0;
         } else if (!strcmp(argv[i], "-globe")) {
+            openvdb::initialize();
             ExperimentFlags experiment_flags = ExperimentFlags();
             experiment_flags.initialize_globe_test();
             experiment_flags.run_equal_extinctions = true;
@@ -161,6 +169,7 @@ int main(int argc, char *argv[]) {
             options.nThreads = 1;
             delete new Globe_Scene(options, experiment_flags);
             options.nThreads = prev_threads;
+            return 0;
         } else if (!strcmp(argv[i], "-pawn")) {
             ExperimentFlags experiment_flags = ExperimentFlags();
             experiment_flags.initialize_pawn_test();
@@ -171,7 +180,9 @@ int main(int argc, char *argv[]) {
             options.nThreads = 1;
             delete new Pawn_Scene(options, experiment_flags);
             options.nThreads = prev_threads;
+            return 0;
         } else if (!strcmp(argv[i], "-smoke")) {
+            openvdb::initialize();
             ExperimentFlags experiment_flags = ExperimentFlags();
             experiment_flags.initialize_smoke_test();
             experiment_flags.run_equal_extinctions = true;
@@ -181,6 +192,7 @@ int main(int argc, char *argv[]) {
             options.nThreads = 1;
             delete new Smoke_Scene(options, experiment_flags);
             options.nThreads = prev_threads;
+            return 0;
         } else if (!strcmp(argv[i], "-teaser")) {
             ExperimentFlags experiment_flags = ExperimentFlags();
             experiment_flags.initialize_teaser_test();
@@ -191,16 +203,19 @@ int main(int argc, char *argv[]) {
             options.nThreads = 1;
             delete new Teaser(options, experiment_flags);
             options.nThreads = prev_threads;
+            return 0;
         } else if (!strcmp(argv[i], "-vase")) {
             ExperimentFlags experiment_flags = ExperimentFlags();
-            experiment_flags.initialize_teaser_test();
+            experiment_flags.initialize_vase_test();
             experiment_flags.run_equal_extinctions = true;
             experiment_flags.run_equal_samples = true;
             experiment_flags.run_stratified_samples = true;
             int prev_threads = options.nThreads;
+            std::cout << "WHOO" << std::endl;
             options.nThreads = 1;
             delete new Vase_Scene(options, experiment_flags);
             options.nThreads = prev_threads;
+            return 0;
         } else
             filenames.push_back(argv[i]);
     }
