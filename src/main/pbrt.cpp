@@ -149,7 +149,7 @@ int main(int argc, char *argv[]) {
         } else if (!strcmp(argv[i], "-fox")) {
             ExperimentFlags experiment_flags = ExperimentFlags();
             experiment_flags.initialize_fox_test();
-            experiment_flags.run_equal_extinctions = false;
+            experiment_flags.run_equal_extinctions = true;
             experiment_flags.run_equal_samples = true;
             experiment_flags.run_stratified_samples = true;
             // hard code nThreads to be one
